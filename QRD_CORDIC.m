@@ -28,22 +28,21 @@ for col = 1:s(2)-1
             R(row, col2) = y_r+1j*y_i;
             if col2 == col
                 R(row, col2) = 0;
-            else
-                R(row, col2) = y_r+1j*y_i;
             end
+        end
 
-            %%
-            qc = QH(row-1, col2);
-            qd = QH(row, col2);
+        for col2 = 1:s(2)
+            c = QH(row-1, col2);
+            d = QH(row, col2);
 
-            [s_qcr, s_qci, ~] = CORDIC(real(qc), imag(qc), -ang_a, 'rotation', iter);
-            [s_qdr, s_qdi, ~] = CORDIC(real(qd), imag(qd), -ang_b, 'rotation', iter);
+            [s_cr, s_ci, ~] = CORDIC(real(c), imag(c), -ang_a, 'rotation', iter);
+            [s_dr, s_di, ~] = CORDIC(real(d), imag(d), -ang_b, 'rotation', iter);
+    
+            [x_r, y_r, ~] = CORDIC(s_cr, s_dr, -ang_1, 'rotation', iter);
+            [x_i, y_i, ~] = CORDIC(s_ci, s_di, -ang_1, 'rotation', iter);
 
-            [qc_r, qd_r, ~] = CORDIC(s_qcr, s_qdr, -ang_1, 'rotation', iter);
-            [qc_i, qd_i, ~] = CORDIC(s_qci, s_qdi, -ang_1, 'rotation', iter);
-
-            QH(row-1, col2) = qc_r+1j*qc_i;
-            QH(row, col2) = qd_r+1j*qd_i;
+            QH(row-1, col2) = x_r+1j*x_i;
+            QH(row, col2) = y_r+1j*y_i;
         end
     end
 end

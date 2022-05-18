@@ -26,20 +26,21 @@ clc;
 %% QR decomposition
 % H = (randn(4, 4) + 1j.*randn(4, 4)) ./ sqrt(2);
 H = (randn(4, 4) + 1j.*randn(4, 4)) ./ sqrt(2);
-H = [1+2j 3+4j; 5+6j 7+8j];
+% H = [-1-2j 3+4j; -5+6j 7-8j];
+
 % % [Q, R] = qr(H);
 [Q, R] = QRD_GR(H);
-[QC, RC] = QRD_CORDIC(H, 80);
+[QC, RC] = QRD_CORDIC(H, 180);
 
 fprintf("Expected:\n");
 disp("===========================");
-disp(Q);
+disp(Q');
 disp(R);
 disp(Q*R);
 disp("===========================");
 fprintf("Actual:\n");
 disp("===========================");
-disp(QC);
+disp(QC');
 disp(RC);
 disp(QC*RC);
 disp("===========================");
@@ -48,3 +49,4 @@ fprintf("Error of R:\n");
 disp(abs(R-RC));
 fprintf("Error of Q:\n");
 disp(abs(Q-QC));
+disp(abs(Q*R - QC*RC));
