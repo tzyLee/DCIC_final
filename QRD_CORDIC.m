@@ -12,7 +12,7 @@ for col = 1:s(2)-1
         [abs_a, ~, ang_a] = CORDIC(real(a), imag(a), 0, 'vectoring', iter);
         [abs_b, ~, ang_b] = CORDIC(real(b), imag(b), 0, 'vectoring', iter);
         [~, ~, ang_1] = CORDIC(abs_a, abs_b, 0, 'vectoring', iter);
-
+        
         % rotation
         for col2 = col:s(2)
             c = R(row-1, col2);
@@ -25,7 +25,7 @@ for col = 1:s(2)-1
             [x_i, y_i, ~] = CORDIC(s_ci, s_di, -ang_1, 'rotation', iter);
 
             R(row-1, col2) = x_r+1j*x_i;
-%             R(row, col2) = y_r+1j*y_i;
+            R(row, col2) = y_r+1j*y_i;
             if col2 == col
                 R(row, col2) = 0;
             else
@@ -36,11 +36,11 @@ for col = 1:s(2)-1
             qc = QH(row-1, col2);
             qd = QH(row, col2);
 
-            [s_qcr, s_qci, ~] = CORDIC(real(qc), imag(qc), ang_a, 'rotation', iter);
-            [s_qdr, s_qdi, ~] = CORDIC(real(qd), imag(qd), ang_b, 'rotation', iter);
+            [s_qcr, s_qci, ~] = CORDIC(real(qc), imag(qc), -ang_a, 'rotation', iter);
+            [s_qdr, s_qdi, ~] = CORDIC(real(qd), imag(qd), -ang_b, 'rotation', iter);
 
-            [qc_r, qd_r, ~] = CORDIC(s_qcr, s_qdr, ang_1, 'rotation', iter);
-            [qc_i, qd_i, ~] = CORDIC(s_qci, s_qdi, ang_1, 'rotation', iter);
+            [qc_r, qd_r, ~] = CORDIC(s_qcr, s_qdr, -ang_1, 'rotation', iter);
+            [qc_i, qd_i, ~] = CORDIC(s_qci, s_qdi, -ang_1, 'rotation', iter);
 
             QH(row-1, col2) = qc_r+1j*qc_i;
             QH(row, col2) = qd_r+1j*qd_i;

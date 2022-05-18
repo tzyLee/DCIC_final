@@ -5,7 +5,8 @@ decoders = ["K-Best (k=16, sorting)", "K-Best (k=16, sorting, GR)"];
 CORDIC_ITER = 30;
 
 %% Simulation
-BER = simulation(N_T, N_R, "16-QAM", 800, 80000, EbN0, decoders);
+load("BER-16-QAM.mat");
+% BER = simulation(N_T, N_R, "16-QAM", 1600, 100000, EbN0, decoders, CORDIC_ITER);
 
 %% Plot
 figure;
@@ -22,7 +23,7 @@ ylim([1e-5, 1]);
 ax = gca;
 ax.FontSize = 14;
 
-function BER = simulation(N_T, N_R, MODULATION, ERR_THRESHOLD, TRIALS, EbN0, decoders)
+function BER = simulation(N_T, N_R, MODULATION, ERR_THRESHOLD, TRIALS, EbN0, decoders, CORDIC_ITER)
 N_SNR = length(EbN0);
 N_D = length(decoders);
 %% Parallel related code

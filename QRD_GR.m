@@ -12,6 +12,7 @@ for col = 1:s(2)-1
         ang_a = angle(a);
         ang_b = angle(b);
         ang_1 = angle(abs(R(row-1, col))+1j*abs(R(row, col)));
+
         rot = [ ...
             cos(ang_1)*exp(-1j*ang_a) sin(ang_1)*exp(-1j*ang_b); ...
             -sin(ang_1)*exp(-1j*ang_a) cos(ang_1)*exp(-1j*ang_b)];

@@ -1,34 +1,35 @@
 clc;
 
 %% Rotation mode
-% xx = [2; 3];
-% rot = [cos(pi/3) -sin(pi/3); sin(pi/3) cos(pi/3)];
+% xx = [-2; 3];
+% angle = -2*pi/3;
+% rot = [cos(angle) -sin(angle); sin(angle) cos(angle)];
 % out = rot * xx;
 % 
-% [x, y, z] = CORDIC(xx(1), xx(2), pi/3, 'rotation', 12);
+% [x, y, z] = CORDIC(xx(1), xx(2), angle, 'rotation', 30);
 % 
 % fprintf("Rotation mode test:\n");
 % fprintf("Expected: %f %f\n", out);
 % fprintf("Actual: %f %f\n\n", x, y);
-% 
+
 
 %% Vectoring mode
-% xx = [5; 4];
+% xx = [-5; 4];
 % 
 % [x, y, z] = CORDIC(xx(1), xx(2), 0, 'vectoring', 12);
 % 
 % fprintf("Vectoring mode test:\n");
-% fprintf("Expected: %f %f\n", vecnorm(xx), atan(4/5));
+% fprintf("Expected: %f %f\n", vecnorm(xx), atan(xx(2)/xx(1)));
 % fprintf("Actual: %f %f\n\n", x, z);
 
 
 %% QR decomposition
 % H = (randn(4, 4) + 1j.*randn(4, 4)) ./ sqrt(2);
 H = (randn(4, 4) + 1j.*randn(4, 4)) ./ sqrt(2);
-% H = [1+2j 3+4j; 5+6j 7+8j];
-% [Q, R] = qr(H);
+H = [1+2j 3+4j; 5+6j 7+8j];
+% % [Q, R] = qr(H);
 [Q, R] = QRD_GR(H);
-[QC, RC] = QRD_CORDIC(H, 30);
+[QC, RC] = QRD_CORDIC(H, 80);
 
 fprintf("Expected:\n");
 disp("===========================");
