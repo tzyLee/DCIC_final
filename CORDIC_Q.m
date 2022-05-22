@@ -1,9 +1,11 @@
 function [x_out, y_out, z_out] = CORDIC_Q(x, y, z, mode, iter, WORD_LEN, FRAC_LEN)
-    F = fimath('SumMode', 'KeepMSB');
+    F = fimath('SumMode', 'SpecifyPrecision', 'SumWordLength', WORD_LEN, 'SumFractionLength', FRAC_LEN);
 %     WORD_LEN = 17;
 %     FRAC_LEN = 13;
 %     GAIN_WORD_LEN = 19;
 %     GAIN_FRAC_LEN = 15;
+
+    dz = fi(atan(2.^-(0:iter-1)), 1, WORD_LEN, FRAC_LEN, F);
 
     x = fi(x, 1, WORD_LEN, FRAC_LEN, F);
     y = fi(y, 1, WORD_LEN, FRAC_LEN, F);
@@ -33,20 +35,24 @@ function [x_out, y_out, z_out] = CORDIC_Q(x, y, z, mode, iter, WORD_LEN, FRAC_LE
             if z < 0
                 x_n = x + bitsra(y, i);
                 y_n = y - bitsra(x, i);
-                z_n = z + atan(2^(-i));
+                z_n = z + dz(i+1);
             elseif z > 0
                 x_n = x - bitsra(y, i);
                 y_n = y + bitsra(x, i);
-                z_n = z - atan(2^(-i));
+                z_n = z - dz(i+1);
             else
                 break
             end
             
             gain = gain*(1/sqrt(1+2^(-2*i)));
 
-            x = fi(x_n, 1, WORD_LEN, FRAC_LEN, F);
-            y = fi(y_n, 1, WORD_LEN, FRAC_LEN, F);
-            z = fi(z_n, 1, WORD_LEN, FRAC_LEN, F);
+%             x = fi(x_n, 1, WORD_LEN, FRAC_LEN, F);
+%             y = fi(y_n, 1, WORD_LEN, FRAC_LEN, F);
+%             z = fi(z_n, 1, WORD_LEN, FRAC_LEN, F);
+
+            x = x_n;
+            y = y_n;
+            z = z_n;
 %             gain = fi(gain, 0, GAIN_WORD_LEN, GAIN_FRAC_LEN, F);
         end
 
@@ -75,20 +81,24 @@ function [x_out, y_out, z_out] = CORDIC_Q(x, y, z, mode, iter, WORD_LEN, FRAC_LE
             if y > 0
                 x_n = x + bitsra(y, i);
                 y_n = y - bitsra(x, i);
-                z_n = z + atan(2^(-i));
+                z_n = z + dz(i+1);
             elseif y < 0
                 x_n = x - bitsra(y, i);
                 y_n = y + bitsra(x, i);
-                z_n = z - atan(2^(-i));
+                z_n = z - dz(i+1);
             else
                 break
             end
             
             gain = gain*(1/sqrt(1+2^(-2*i)));
 
-            x = fi(x_n, 1, WORD_LEN, FRAC_LEN, F);
-            y = fi(y_n, 1, WORD_LEN, FRAC_LEN, F);
-            z = fi(z_n, 1, WORD_LEN, FRAC_LEN, F);
+%             x = fi(x_n, 1, WORD_LEN, FRAC_LEN, F);
+%             y = fi(y_n, 1, WORD_LEN, FRAC_LEN, F);
+%             z = fi(z_n, 1, WORD_LEN, FRAC_LEN, F);
+
+            x = x_n;
+            y = y_n;
+            z = z_n;
 %             gain = fi(gain, 0, GAIN_WORD_LEN, GAIN_FRAC_LEN, F);
         end
     else
