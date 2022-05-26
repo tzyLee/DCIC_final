@@ -36,7 +36,10 @@ H = [-1.0650 - 0.7543i  -0.1847 + 0.1290i  -0.6703 + 0.0695i 0.0088 + 0.1643i;..
 
 % [Q, R] = qr(H);
 [Q, R] = QRD_GR(H);
-[QC, RC] = QRD_CORDIC(H, 19, 20, 15);
+Hf = fi(H, 1, 18, 14);
+[QC, RC] = QRD_CORDIC(Hf, 17);
+QC = double(QC);
+RC = double(RC);
 
 fprintf("Expected:\n");
 disp("===========================");
