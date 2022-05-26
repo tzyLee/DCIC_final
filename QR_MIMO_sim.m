@@ -4,7 +4,7 @@ EbN0 = 0:4:20;
 decoders = ["K-Best (k=16, sorting)", "K-Best (k=16, sorting, GR14)", "K-Best (k=16, sorting, GR15)", "K-Best (k=16, sorting, GR16)", "K-Best (k=16, sorting, GR17)", "K-Best (k=16, sorting, GR18)", "K-Best (k=16, sorting, GR19)", "K-Best (k=16, sorting, GR20)"];
 
 %% Simulation
-BER = simulation(N_T, N_R, "16-QAM", 10, 1000, EbN0, decoders);
+BER = simulation(N_T, N_R, "16-QAM", 400, 100000, EbN0, decoders);
 
 %% Plot
 % figure;
