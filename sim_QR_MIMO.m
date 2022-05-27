@@ -2,36 +2,38 @@ N_T = 4; % number of transmit antennas
 N_R = 4; % number of receive antennas
 EbN0 = [0:4:16, 18, 20];
 decoders = ["K-Best (k=16, sorting)", ...
-    "K-Best (k=16, sorting, GR10)", "K-Best (k=16, sorting, GR11)",...
-    "K-Best (k=16, sorting, GR12)", "K-Best (k=16, sorting, GR13)",...
-    "K-Best (k=16, sorting, GR14)", "K-Best (k=16, sorting, GR15)",...
-    "K-Best (k=16, sorting, GR16)","K-Best (k=16, sorting, GR17)", "K-Best (k=16, sorting, GR18)"];
+    "K-Best (k=16, sorting, 10 bit)", "K-Best (k=16, sorting, 11 bit)",...
+    "K-Best (k=16, sorting, 12 bit)", "K-Best (k=16, sorting, 13 bit)",...
+    "K-Best (k=16, sorting, 14 bit)", "K-Best (k=16, sorting, 15 bit)",...
+    "K-Best (k=16, sorting, 16 bit)", "K-Best (k=16, sorting, 17 bit)",...
+    "K-Best (k=16, sorting, 18 bit)"];
 
 %% Simulation
-BER = simulation(N_T, N_R, "16-QAM", 1200, 100000, EbN0, decoders);
+% BER = simulation(N_T, N_R, "16-QAM", 1600, 100000, EbN0, decoders);
+load('BER-16-QAM.mat')
 
-%% Plot
-% figure;
-% semilogy(EbN0, BER(1, :), '-o', 'LineWidth', 2, 'MarkerSize', 10);
-% hold on;
-% grid on;
-% semilogy(EbN0, BER(2, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
-% semilogy(EbN0, BER(3, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
-% semilogy(EbN0, BER(4, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
-% semilogy(EbN0, BER(5, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
-% semilogy(EbN0, BER(6, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
-% semilogy(EbN0, BER(7, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
-% semilogy(EbN0, BER(8, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
-% semilogy(EbN0, BER(9, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
-% semilogy(EbN0, BER(10, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
-% xlabel("Eb/N0 (dB)");
-% ylabel("BER");
-% title(sprintf("%dx%d 16-QAM Detection", N_T, N_R));
-% legend(decoders);
-% xlim([min(EbN0), max(EbN0)]);
-% ylim([1e-5, 1]);
-% ax = gca;
-% ax.FontSize = 14;
+% Plot
+figure;
+semilogy(EbN0, BER(1, :), '-o', 'LineWidth', 2, 'MarkerSize', 10);
+hold on;
+grid on;
+semilogy(EbN0, BER(2, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+semilogy(EbN0, BER(3, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+semilogy(EbN0, BER(4, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+semilogy(EbN0, BER(5, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+semilogy(EbN0, BER(6, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+semilogy(EbN0, BER(7, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+semilogy(EbN0, BER(8, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+semilogy(EbN0, BER(9, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+semilogy(EbN0, BER(10, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+xlabel("Eb/N0 (dB)");
+ylabel("BER");
+title(sprintf("%dx%d 16-QAM Detection", N_T, N_R));
+legend(decoders);
+xlim([min(EbN0), max(EbN0)]);
+ylim([1e-5, 1]);
+ax = gca;
+ax.FontSize = 14;
 
 function BER = simulation(N_T, N_R, MODULATION, ERR_THRESHOLD, TRIALS, EbN0, decoders)
 N_SNR = length(EbN0);
@@ -100,25 +102,21 @@ for t=1:TRIALS_PER_WORKER
     Hs10 = fi(Hs, 1, 10, 10-4, F);
     [QHs_GR1, RHs_GR1] = QRD_CORDIC_10(Hs10, 9);
 
-    [QHs, RHs] = qr(Hs);
     F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 11, 'SumFractionLength', 11-4);
     globalfimath(F);
     Hs11 = fi(Hs, 1, 11, 11-4, F);
     [QHs_GR2, RHs_GR2] = QRD_CORDIC_11(Hs11, 10);
 
-    [QHs, RHs] = qr(Hs);
     F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 12, 'SumFractionLength', 12-4);
     globalfimath(F);
     Hs12 = fi(Hs, 1, 12, 12-4, F);
     [QHs_GR3, RHs_GR3] = QRD_CORDIC_12(Hs12, 11);
 
-    [QHs, RHs] = qr(Hs);
     F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 13, 'SumFractionLength', 13-4);
     globalfimath(F);
     Hs13 = fi(Hs, 1, 13, 13-4, F);
     [QHs_GR4, RHs_GR4] = QRD_CORDIC_13(Hs13, 12);
 
-    [QHs, RHs] = qr(Hs);
     F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 14, 'SumFractionLength', 14-4);
     globalfimath(F);
     Hs14 = fi(Hs, 1, 14, 14-4, F);
@@ -216,7 +214,7 @@ for t=1:TRIALS_PER_WORKER
         BER_worker(5, si) = BER_worker(5, si) + bitErr / (N_T*Q);
 
         %% KBest (k=16, sorting)
-        x_hat_KBest16_s = KBest(16, RHs_GR4, zs_GR_tilde5, sym);
+        x_hat_KBest16_s = KBest(16, RHs_GR5, zs_GR_tilde5, sym);
         % restore original order
         x_hat_KBest16_GR = zeros(size(x_hat_KBest16_s));
         x_hat_KBest16_GR(sortIdx) = x_hat_KBest16_s;
@@ -225,7 +223,7 @@ for t=1:TRIALS_PER_WORKER
         BER_worker(6, si) = BER_worker(6, si) + bitErr / (N_T*Q);
 
         %% KBest (k=16, sorting)
-        x_hat_KBest16_s = KBest(16, RHs_GR4, zs_GR_tilde6, sym);
+        x_hat_KBest16_s = KBest(16, RHs_GR6, zs_GR_tilde6, sym);
         % restore original order
         x_hat_KBest16_GR = zeros(size(x_hat_KBest16_s));
         x_hat_KBest16_GR(sortIdx) = x_hat_KBest16_s;
@@ -234,7 +232,7 @@ for t=1:TRIALS_PER_WORKER
         BER_worker(7, si) = BER_worker(7, si) + bitErr / (N_T*Q);
 
         %% KBest (k=16, sorting)
-        x_hat_KBest16_s = KBest(16, RHs_GR4, zs_GR_tilde7, sym);
+        x_hat_KBest16_s = KBest(16, RHs_GR7, zs_GR_tilde7, sym);
         % restore original order
         x_hat_KBest16_GR = zeros(size(x_hat_KBest16_s));
         x_hat_KBest16_GR(sortIdx) = x_hat_KBest16_s;
@@ -243,7 +241,7 @@ for t=1:TRIALS_PER_WORKER
         BER_worker(8, si) = BER_worker(8, si) + bitErr / (N_T*Q);
 
         %% KBest (k=16, sorting)
-        x_hat_KBest16_s = KBest(16, RHs_GR4, zs_GR_tilde8, sym);
+        x_hat_KBest16_s = KBest(16, RHs_GR8, zs_GR_tilde8, sym);
         % restore original order
         x_hat_KBest16_GR = zeros(size(x_hat_KBest16_s));
         x_hat_KBest16_GR(sortIdx) = x_hat_KBest16_s;
@@ -252,7 +250,7 @@ for t=1:TRIALS_PER_WORKER
         BER_worker(9, si) = BER_worker(9, si) + bitErr / (N_T*Q);
 
         %% KBest (k=16, sorting)
-        x_hat_KBest16_s = KBest(16, RHs_GR4, zs_GR_tilde9, sym);
+        x_hat_KBest16_s = KBest(16, RHs_GR9, zs_GR_tilde9, sym);
         % restore original order
         x_hat_KBest16_GR = zeros(size(x_hat_KBest16_s));
         x_hat_KBest16_GR(sortIdx) = x_hat_KBest16_s;
@@ -407,7 +405,7 @@ for si = 1:N_SNR
             bitError(5) = bitError(5) + bitErr;
 
             %% KBest (k=16, sorting)
-            x_hat_KBest16_s = KBest(16, RHs_GR4, zs_GR_tilde5, sym);
+            x_hat_KBest16_s = KBest(16, RHs_GR5, zs_GR_tilde5, sym);
             % restore original order
             x_hat_KBest16_GR = zeros(size(x_hat_KBest16_s));
             x_hat_KBest16_GR(sortIdx) = x_hat_KBest16_s;
@@ -416,7 +414,7 @@ for si = 1:N_SNR
             bitError(6) = bitError(6) + bitErr;
 
             %% KBest (k=16, sorting)
-            x_hat_KBest16_s = KBest(16, RHs_GR4, zs_GR_tilde6, sym);
+            x_hat_KBest16_s = KBest(16, RHs_GR6, zs_GR_tilde6, sym);
             % restore original order
             x_hat_KBest16_GR = zeros(size(x_hat_KBest16_s));
             x_hat_KBest16_GR(sortIdx) = x_hat_KBest16_s;
@@ -425,7 +423,7 @@ for si = 1:N_SNR
             bitError(7) = bitError(7) + bitErr;
 
             %% KBest (k=16, sorting)
-            x_hat_KBest16_s = KBest(16, RHs_GR4, zs_GR_tilde7, sym);
+            x_hat_KBest16_s = KBest(16, RHs_GR7, zs_GR_tilde7, sym);
             % restore original order
             x_hat_KBest16_GR = zeros(size(x_hat_KBest16_s));
             x_hat_KBest16_GR(sortIdx) = x_hat_KBest16_s;
@@ -434,7 +432,7 @@ for si = 1:N_SNR
             bitError(8) = bitError(8) + bitErr;
 
             %% KBest (k=16, sorting)
-            x_hat_KBest16_s = KBest(16, RHs_GR4, zs_GR_tilde8, sym);
+            x_hat_KBest16_s = KBest(16, RHs_GR8, zs_GR_tilde8, sym);
             % restore original order
             x_hat_KBest16_GR = zeros(size(x_hat_KBest16_s));
             x_hat_KBest16_GR(sortIdx) = x_hat_KBest16_s;
@@ -443,7 +441,7 @@ for si = 1:N_SNR
             bitError(9) = bitError(9) + bitErr;
 
             %% KBest (k=16, sorting)
-            x_hat_KBest16_s = KBest(16, RHs_GR4, zs_GR_tilde9, sym);
+            x_hat_KBest16_s = KBest(16, RHs_GR9, zs_GR_tilde9, sym);
             % restore original order
             x_hat_KBest16_GR = zeros(size(x_hat_KBest16_s));
             x_hat_KBest16_GR(sortIdx) = x_hat_KBest16_s;

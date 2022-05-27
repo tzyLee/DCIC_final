@@ -1,3 +1,5 @@
 *.mat
 *.asv
 .MATLABDriveTag
+*.mex*64
+fiaccel
