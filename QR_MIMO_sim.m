@@ -1,10 +1,14 @@
 N_T = 4; % number of transmit antennas
 N_R = 4; % number of receive antennas
-EbN0 = 0:4:20;
-decoders = ["K-Best (k=16, sorting)", "K-Best (k=16, sorting, GR14)", "K-Best (k=16, sorting, GR15)", "K-Best (k=16, sorting, GR16)", "K-Best (k=16, sorting, GR17)", "K-Best (k=16, sorting, GR18)", "K-Best (k=16, sorting, GR19)", "K-Best (k=16, sorting, GR20)"];
+EbN0 = [0:4:16, 18, 20];
+decoders = ["K-Best (k=16, sorting)", ...
+    "K-Best (k=16, sorting, GR10)", "K-Best (k=16, sorting, GR11)",...
+    "K-Best (k=16, sorting, GR12)", "K-Best (k=16, sorting, GR13)",...
+    "K-Best (k=16, sorting, GR14)", "K-Best (k=16, sorting, GR15)",...
+    "K-Best (k=16, sorting, GR16)","K-Best (k=16, sorting, GR17)", "K-Best (k=16, sorting, GR18)"];
 
 %% Simulation
-BER = simulation(N_T, N_R, "16-QAM", 400, 100000, EbN0, decoders);
+BER = simulation(N_T, N_R, "16-QAM", 1200, 100000, EbN0, decoders);
 
 %% Plot
 % figure;
@@ -12,6 +16,14 @@ BER = simulation(N_T, N_R, "16-QAM", 400, 100000, EbN0, decoders);
 % hold on;
 % grid on;
 % semilogy(EbN0, BER(2, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+% semilogy(EbN0, BER(3, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+% semilogy(EbN0, BER(4, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+% semilogy(EbN0, BER(5, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+% semilogy(EbN0, BER(6, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+% semilogy(EbN0, BER(7, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+% semilogy(EbN0, BER(8, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+% semilogy(EbN0, BER(9, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+% semilogy(EbN0, BER(10, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
 % xlabel("Eb/N0 (dB)");
 % ylabel("BER");
 % title(sprintf("%dx%d 16-QAM Detection", N_T, N_R));
@@ -83,34 +95,56 @@ for t=1:TRIALS_PER_WORKER
 
     % QR decomposition of H
     [QHs, RHs] = qr(Hs);
+    F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 10, 'SumFractionLength', 10-4);
+    globalfimath(F);
+    Hs10 = fi(Hs, 1, 10, 10-4, F);
+    [QHs_GR1, RHs_GR1] = QRD_CORDIC_10(Hs10, 9);
+
+    [QHs, RHs] = qr(Hs);
+    F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 11, 'SumFractionLength', 11-4);
+    globalfimath(F);
+    Hs11 = fi(Hs, 1, 11, 11-4, F);
+    [QHs_GR2, RHs_GR2] = QRD_CORDIC_11(Hs11, 10);
+
+    [QHs, RHs] = qr(Hs);
+    F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 12, 'SumFractionLength', 12-4);
+    globalfimath(F);
+    Hs12 = fi(Hs, 1, 12, 12-4, F);
+    [QHs_GR3, RHs_GR3] = QRD_CORDIC_12(Hs12, 11);
+
+    [QHs, RHs] = qr(Hs);
+    F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 13, 'SumFractionLength', 13-4);
+    globalfimath(F);
+    Hs13 = fi(Hs, 1, 13, 13-4, F);
+    [QHs_GR4, RHs_GR4] = QRD_CORDIC_13(Hs13, 12);
+
+    [QHs, RHs] = qr(Hs);
     F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 14, 'SumFractionLength', 14-4);
     globalfimath(F);
     Hs14 = fi(Hs, 1, 14, 14-4, F);
-    [QHs_GR1, RHs_GR1] = QRD_CORDIC_14(Hs14, 13);
+    [QHs_GR5, RHs_GR5] = QRD_CORDIC_14(Hs14, 13);
+
     F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 15, 'SumFractionLength', 15-4);
     globalfimath(F);
     Hs15 = fi(Hs, 1, 15, 15-4, F);
-    [QHs_GR2, RHs_GR2] = QRD_CORDIC_15(Hs15, 14);
+    [QHs_GR6, RHs_GR6] = QRD_CORDIC_15(Hs15, 14);
+
     F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 16, 'SumFractionLength', 16-4);
     globalfimath(F);
     Hs16 = fi(Hs, 1, 16, 16-4, F);
-    [QHs_GR3, RHs_GR3] = QRD_CORDIC_16(Hs16, 15);
+    [QHs_GR7, RHs_GR7] = QRD_CORDIC_16(Hs16, 15);
+
     F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 17, 'SumFractionLength', 17-4);
     globalfimath(F);
     Hs17 = fi(Hs, 1, 17, 17-4, F);
-    [QHs_GR4, RHs_GR4] = QRD_CORDIC_17(Hs17, 16);
+    [QHs_GR8, RHs_GR8] = QRD_CORDIC_17(Hs17, 16);
+
     F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 18, 'SumFractionLength', 18-4);
     globalfimath(F);
     Hs18 = fi(Hs, 1, 18, 18-4, F);
-    [QHs_GR5, RHs_GR5] = QRD_CORDIC_18(Hs18, 17);
-    F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 19, 'SumFractionLength', 19-4);
-    globalfimath(F);
-    Hs19 = fi(Hs, 1, 19, 19-4, F);
-    [QHs_GR6, RHs_GR6] = QRD_CORDIC_19(Hs19, 18);
-    F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 20, 'SumFractionLength', 20-4);
-    globalfimath(F);
-    Hs20 = fi(Hs, 1, 20, 20-4, F);
-    [QHs_GR7, RHs_GR7] = QRD_CORDIC_20(Hs20, 19);
+    [QHs_GR9, RHs_GR9] = QRD_CORDIC_18(Hs18, 17);
+
+
     RHs_GR1 = double(RHs_GR1);
     RHs_GR2 = double(RHs_GR2);
     RHs_GR3 = double(RHs_GR3);
@@ -118,6 +152,8 @@ for t=1:TRIALS_PER_WORKER
     RHs_GR5 = double(RHs_GR5);
     RHs_GR6 = double(RHs_GR6);
     RHs_GR7 = double(RHs_GR7);
+    RHs_GR8 = double(RHs_GR8);
+    RHs_GR9 = double(RHs_GR9);
 
     for si = 1:N_SNR
         % Transmit data
@@ -130,6 +166,8 @@ for t=1:TRIALS_PER_WORKER
         zs_GR_tilde5 = double(QHs_GR5') * y;
         zs_GR_tilde6 = double(QHs_GR6') * y;
         zs_GR_tilde7 = double(QHs_GR7') * y;
+        zs_GR_tilde8 = double(QHs_GR8') * y;
+        zs_GR_tilde9 = double(QHs_GR9') * y;
 
         %% KBest (k=16, sorting)
         x_hat_KBest16_s = KBest(16, RHs, zs_tilde, sym);
@@ -203,6 +241,24 @@ for t=1:TRIALS_PER_WORKER
         [~, idx_hat_KBest16_s_GR] = min(abs(x_hat_KBest16_GR - sym.').^2, [], 2);
         bitErr = sum(numBitDiff(rowIdx + idx_hat_KBest16_s_GR));
         BER_worker(8, si) = BER_worker(8, si) + bitErr / (N_T*Q);
+
+        %% KBest (k=16, sorting)
+        x_hat_KBest16_s = KBest(16, RHs_GR4, zs_GR_tilde8, sym);
+        % restore original order
+        x_hat_KBest16_GR = zeros(size(x_hat_KBest16_s));
+        x_hat_KBest16_GR(sortIdx) = x_hat_KBest16_s;
+        [~, idx_hat_KBest16_s_GR] = min(abs(x_hat_KBest16_GR - sym.').^2, [], 2);
+        bitErr = sum(numBitDiff(rowIdx + idx_hat_KBest16_s_GR));
+        BER_worker(9, si) = BER_worker(9, si) + bitErr / (N_T*Q);
+
+        %% KBest (k=16, sorting)
+        x_hat_KBest16_s = KBest(16, RHs_GR4, zs_GR_tilde9, sym);
+        % restore original order
+        x_hat_KBest16_GR = zeros(size(x_hat_KBest16_s));
+        x_hat_KBest16_GR(sortIdx) = x_hat_KBest16_s;
+        [~, idx_hat_KBest16_s_GR] = min(abs(x_hat_KBest16_GR - sym.').^2, [], 2);
+        bitErr = sum(numBitDiff(rowIdx + idx_hat_KBest16_s_GR));
+        BER_worker(10, si) = BER_worker(10, si) + bitErr / (N_T*Q);
     end
 end
 BER(:, :, p) = BER_worker;
@@ -237,34 +293,51 @@ for si = 1:N_SNR
 
             % QR decomposition of H
             [QHs, RHs] = qr(Hs);
+            F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 10, 'SumFractionLength', 10-4);
+            globalfimath(F);
+            Hs10 = fi(Hs, 1, 10, 10-4, F);
+            [QHs_GR1, RHs_GR1] = QRD_CORDIC_10(Hs10, 9);
+
+            F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 11, 'SumFractionLength', 11-4);
+            globalfimath(F);
+            Hs11 = fi(Hs, 1, 11, 11-4, F);
+            [QHs_GR2, RHs_GR2] = QRD_CORDIC_11(Hs11, 10);
+
+            F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 12, 'SumFractionLength', 12-4);
+            globalfimath(F);
+            Hs12 = fi(Hs, 1, 12, 12-4, F);
+            [QHs_GR3, RHs_GR3] = QRD_CORDIC_12(Hs12, 11);
+
+            F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 13, 'SumFractionLength', 13-4);
+            globalfimath(F);
+            Hs13 = fi(Hs, 1, 13, 13-4, F);
+            [QHs_GR4, RHs_GR4] = QRD_CORDIC_13(Hs13, 12);
+
             F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 14, 'SumFractionLength', 14-4);
             globalfimath(F);
             Hs14 = fi(Hs, 1, 14, 14-4, F);
-            [QHs_GR1, RHs_GR1] = QRD_CORDIC_14(Hs14, 13);
+            [QHs_GR5, RHs_GR5] = QRD_CORDIC_14(Hs14, 13);
+
             F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 15, 'SumFractionLength', 15-4);
             globalfimath(F);
             Hs15 = fi(Hs, 1, 15, 15-4, F);
-            [QHs_GR2, RHs_GR2] = QRD_CORDIC_15(Hs15, 14);
+            [QHs_GR6, RHs_GR6] = QRD_CORDIC_15(Hs15, 14);
+
             F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 16, 'SumFractionLength', 16-4);
             globalfimath(F);
             Hs16 = fi(Hs, 1, 16, 16-4, F);
-            [QHs_GR3, RHs_GR3] = QRD_CORDIC_16(Hs16, 15);
+            [QHs_GR7, RHs_GR7] = QRD_CORDIC_16(Hs16, 15);
+
             F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 17, 'SumFractionLength', 17-4);
             globalfimath(F);
             Hs17 = fi(Hs, 1, 17, 17-4, F);
-            [QHs_GR4, RHs_GR4] = QRD_CORDIC_17(Hs17, 16);
+            [QHs_GR8, RHs_GR8] = QRD_CORDIC_17(Hs17, 16);
+
             F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 18, 'SumFractionLength', 18-4);
             globalfimath(F);
             Hs18 = fi(Hs, 1, 18, 18-4, F);
-            [QHs_GR5, RHs_GR5] = QRD_CORDIC_18(Hs18, 17);
-            F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 19, 'SumFractionLength', 19-4);
-            globalfimath(F);
-            Hs19 = fi(Hs, 1, 19, 19-4, F);
-            [QHs_GR6, RHs_GR6] = QRD_CORDIC_19(Hs19, 18);
-            F = fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'SumMode', 'SpecifyPrecision', 'SumWordLength', 20, 'SumFractionLength', 20-4);
-            globalfimath(F);
-            Hs20 = fi(Hs, 1, 20, 20-4, F);
-            [QHs_GR7, RHs_GR7] = QRD_CORDIC_20(Hs20, 19);
+            [QHs_GR9, RHs_GR9] = QRD_CORDIC_18(Hs18, 17);
+
             RHs_GR1 = double(RHs_GR1);
             RHs_GR2 = double(RHs_GR2);
             RHs_GR3 = double(RHs_GR3);
@@ -272,6 +345,8 @@ for si = 1:N_SNR
             RHs_GR5 = double(RHs_GR5);
             RHs_GR6 = double(RHs_GR6);
             RHs_GR7 = double(RHs_GR7);
+            RHs_GR8 = double(RHs_GR8);
+            RHs_GR9 = double(RHs_GR9);
 
             % Transmit data
             y = H*s + sqrt(N0(si)) .* n;
@@ -283,6 +358,8 @@ for si = 1:N_SNR
             zs_GR_tilde5 = double(QHs_GR5') * y;
             zs_GR_tilde6 = double(QHs_GR6') * y;
             zs_GR_tilde7 = double(QHs_GR7') * y;
+            zs_GR_tilde8 = double(QHs_GR8') * y;
+            zs_GR_tilde9 = double(QHs_GR9') * y;
 
             %% KBest (k=16, sorting)
             x_hat_KBest16_s = KBest(16, RHs, zs_tilde, sym);
@@ -355,6 +432,24 @@ for si = 1:N_SNR
             [~, idx_hat_KBest16_s_GR] = min(abs(x_hat_KBest16_GR - sym.').^2, [], 2);
             bitErr = sum(numBitDiff(rowIdx + idx_hat_KBest16_s_GR));
             bitError(8) = bitError(8) + bitErr;
+
+            %% KBest (k=16, sorting)
+            x_hat_KBest16_s = KBest(16, RHs_GR4, zs_GR_tilde8, sym);
+            % restore original order
+            x_hat_KBest16_GR = zeros(size(x_hat_KBest16_s));
+            x_hat_KBest16_GR(sortIdx) = x_hat_KBest16_s;
+            [~, idx_hat_KBest16_s_GR] = min(abs(x_hat_KBest16_GR - sym.').^2, [], 2);
+            bitErr = sum(numBitDiff(rowIdx + idx_hat_KBest16_s_GR));
+            bitError(9) = bitError(9) + bitErr;
+
+            %% KBest (k=16, sorting)
+            x_hat_KBest16_s = KBest(16, RHs_GR4, zs_GR_tilde9, sym);
+            % restore original order
+            x_hat_KBest16_GR = zeros(size(x_hat_KBest16_s));
+            x_hat_KBest16_GR(sortIdx) = x_hat_KBest16_s;
+            [~, idx_hat_KBest16_s_GR] = min(abs(x_hat_KBest16_GR - sym.').^2, [], 2);
+            bitErr = sum(numBitDiff(rowIdx + idx_hat_KBest16_s_GR));
+            bitError(10) = bitError(10) + bitErr;
 
             numError_worker(:, p) = numError_worker(:, p) + bitError;
         end

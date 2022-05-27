@@ -11,7 +11,7 @@ H = [-1.0650 - 0.7543i  -0.1847 + 0.1290i  -0.6703 + 0.0695i 0.0088 + 0.1643i;..
 % [Q, R] = qr(H);
 [Q, R] = QRD_GR(H);
 
-for WORD_LEN = [14,15,16,17,18,19,20]
+for WORD_LEN = 10:18
 %WORD_LEN = 17;
 %FRAC_LEN = 13;
 FRAC_LEN = WORD_LEN-4;
@@ -28,6 +28,22 @@ Hf = fi(H, 1, WORD_LEN, FRAC_LEN, F);
 %% Compile
 iter = WORD_LEN-1;
 switch WORD_LEN
+case 10
+  fiaccel QRD_CORDIC -args {Hf,iter} -report -o QRD_CORDIC_10
+  % Compiled version
+  tic, [QCm, RCm] = QRD_CORDIC_10(Hf, iter);toc
+case 11
+  fiaccel QRD_CORDIC -args {Hf,iter} -report -o QRD_CORDIC_11
+  % Compiled version
+  tic, [QCm, RCm] = QRD_CORDIC_11(Hf, iter);toc
+case 12
+  fiaccel QRD_CORDIC -args {Hf,iter} -report -o QRD_CORDIC_12
+  % Compiled version
+  tic, [QCm, RCm] = QRD_CORDIC_12(Hf, iter);toc
+case 13
+  fiaccel QRD_CORDIC -args {Hf,iter} -report -o QRD_CORDIC_13
+  % Compiled version
+  tic, [QCm, RCm] = QRD_CORDIC_13(Hf, iter);toc
 case 14
   fiaccel QRD_CORDIC -args {Hf,iter} -report -o QRD_CORDIC_14
   % Compiled version
@@ -48,14 +64,6 @@ case 18
   fiaccel QRD_CORDIC -args {Hf,iter} -report -o QRD_CORDIC_18
   % Compiled version
   tic, [QCm, RCm] = QRD_CORDIC_18(Hf, iter);toc
-case 19
-  fiaccel QRD_CORDIC -args {Hf,iter} -report -o QRD_CORDIC_19
-  % Compiled version
-  tic, [QCm, RCm] = QRD_CORDIC_19(Hf, iter);toc
-case 20
-  fiaccel QRD_CORDIC -args {Hf,iter} -report -o QRD_CORDIC_20
-  % Compiled version
-  tic, [QCm, RCm] = QRD_CORDIC_20(Hf, iter);toc
 end
 
 %% Test
