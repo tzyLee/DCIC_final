@@ -36,43 +36,58 @@ output in_ready;
 output out_valid;
 
 // Input buffer
-reg row_in_1_f_r, row_in_2_f_r, row_in_3_f_r;
-reg row_in_1_f_w, row_in_2_f_w, row_in_3_f_w;
-reg signed [WIDTH-1:0] row_in_1_r_r, row_in_1_i_r,
-                       row_in_2_r_r, row_in_2_i_r,
-                       row_in_3_r_r, row_in_3_i_r,
-                       row_in_4_r_r, row_in_4_i_r;
-reg signed [WIDTH-1:0] row_in_1_r_w, row_in_1_i_w,
-                       row_in_2_r_w, row_in_2_i_w,
-                       row_in_3_r_w, row_in_3_i_w,
-                       row_in_4_r_w, row_in_4_i_w;
+reg in_row_1_f_r, in_row_2_f_r, in_row_3_f_r;
+reg in_row_1_f_w, in_row_2_f_w, in_row_3_f_w;
+reg signed [WIDTH-1:0] in_row_1_r_r, in_row_1_i_r,
+                       in_row_2_r_r, in_row_2_i_r,
+                       in_row_3_r_r, in_row_3_i_r,
+                       in_row_4_r_r, in_row_4_i_r;
+reg signed [WIDTH-1:0] in_row_1_r_w, in_row_1_i_w,
+                       in_row_2_r_w, in_row_2_i_w,
+                       in_row_3_r_w, in_row_3_i_w,
+                       in_row_4_r_w, in_row_4_i_w;
+
+// Systolic array buffer (for pipelining)
+reg signed [2*WIDTH:0] row_buf_1_1_r, row_buf_1_1_w; // {flag, real, imag}
+reg signed [2*WIDTH:0] row_buf_1_2_r, row_buf_1_2_w;
+reg signed [2*WIDTH:0] row_buf_1_3_r, row_buf_1_3_w;
+reg signed [2*WIDTH:0] row_buf_2_1_r, row_buf_2_1_w;
+reg signed [2*WIDTH:0] row_buf_2_2_r, row_buf_2_2_w;
+reg signed [2*WIDTH:0] row_buf_3_1_r, row_buf_3_1_w;
+
+reg signed [2*WIDTH:0] col_buf_1_2_r, col_buf_1_2_w;
+reg signed [2*WIDTH:0] col_buf_1_3_r, col_buf_1_3_w;
+reg signed [2*WIDTH:0] col_buf_2_2_r, col_buf_2_2_w;
 
 // Row-wise wire
-wire signed [WIDTH-1:0] row_1_r_1, row_1_i_1;
-wire signed [WIDTH-1:0] row_1_r_2, row_1_i_2;
-wire signed [WIDTH-1:0] row_1_r_3, row_1_i_3;
+wire signed [WIDTH-1:0] row_in_1_r_1, row_out_1_r_1, row_in_1_i_1, row_out_1_i_1;
+wire signed [WIDTH-1:0] row_in_1_r_2, row_out_1_r_2, row_in_1_i_2, row_out_1_i_2;
+wire signed [WIDTH-1:0] row_in_1_r_3, row_out_1_r_3, row_in_1_i_3, row_out_1_i_3;
+wire signed [WIDTH-1:0] row_out_1_r_4, row_out_1_i_4;
 
-wire signed [WIDTH-1:0] row_2_r_2, row_2_i_2;
-wire signed [WIDTH-1:0] row_2_r_3, row_2_i_3;
+wire signed [WIDTH-1:0] row_in_2_r_2, row_out_2_r_2, row_in_2_i_2, row_out_2_i_2;
+wire signed [WIDTH-1:0] row_in_2_r_3, row_out_2_r_3, row_in_2_i_3, row_out_2_i_3;
+wire signed [WIDTH-1:0] row_out_2_r_4, row_out_2_i_4;
 
-wire signed [WIDTH-1:0] row_3_r_3, row_3_i_3;
+wire signed [WIDTH-1:0] row_in_3_r_3, row_out_3_r_3, row_in_3_i_3, row_out_3_i_3;
+wire signed [WIDTH-1:0] row_out_3_r_4, row_out_3_i_4;
 
-wire row_1_f_1, row_1_f_2, row_1_f_3;
-wire row_2_f_2, row_2_f_3;
-wire row_3_f_3;
+wire row_in_1_f_1, row_out_1_f_1, row_in_1_f_2, row_out_1_f_2, row_in_1_f_3, row_out_1_f_3;
+wire row_in_2_f_2, row_out_2_f_2, row_in_2_f_3, row_out_2_f_3;
+wire row_in_3_f_3, row_out_3_f_3;
 // Column-wise wire
-wire signed [WIDTH-1:0] col_3_r_1, col_3_i_1;
-wire signed [WIDTH-1:0] col_3_r_2, col_3_i_2;
-wire signed [WIDTH-1:0] col_3_r_3, col_3_i_3;
+wire signed [WIDTH-1:0] col_in_3_r_1, col_out_3_r_1, col_in_3_i_1, col_out_3_i_1;
+wire signed [WIDTH-1:0] col_in_3_r_2, col_out_3_r_2, col_in_3_i_2, col_out_3_i_2;
+wire signed [WIDTH-1:0] col_in_3_r_3, col_out_3_r_3, col_in_3_i_3, col_out_3_i_3;
 
-wire signed [WIDTH-1:0] col_2_r_1, col_2_i_1;
-wire signed [WIDTH-1:0] col_2_r_2, col_2_i_2;
+wire signed [WIDTH-1:0] col_in_2_r_1, col_out_2_r_1, col_in_2_i_1, col_out_2_i_1;
+wire signed [WIDTH-1:0] col_in_2_r_2, col_out_2_r_2, col_in_2_i_2, col_out_2_i_2;
 
-wire signed [WIDTH-1:0] col_1_r_1, col_1_i_1;
+wire signed [WIDTH-1:0] col_in_1_r_1, col_out_1_r_1, col_in_1_i_1, col_out_1_i_1;
 
-wire col_3_f_1, col_3_f_2, col_3_f_3;
-wire col_2_f_1, col_2_f_2;
-wire col_1_f_1;
+wire col_in_3_f_1, col_out_3_f_1, col_in_3_f_2, col_out_3_f_2, col_in_3_f_3, col_out_3_f_3;
+wire col_in_2_f_1, col_out_2_f_1, col_in_2_f_2, col_out_2_f_2;
+wire col_in_1_f_1, col_out_1_f_1;
 // Pipeline control
 wire PE_switch, PE_load, DU_load, CORDIC_load;
 
@@ -84,70 +99,77 @@ reg [4:0] counter_r, counter_w;
 /* 1st row */
 DU #(.WIDTH(WIDTH)) du_row_1(
     .clk(clk), .load(DU_load),
-    .din_r(row_in_1_r_r), .din_i(row_in_1_i_r), .din_f(row_in_1_f_r),
-    .dout_r(row_1_r_1),   .dout_i(row_1_i_1),   .dout_f(row_1_f_1)
+    .din_r(in_row_1_r_r),   .din_i(in_row_1_i_r),   .din_f(in_row_1_f_r),
+    .dout_r(row_out_1_r_1), .dout_i(row_out_1_i_1), .dout_f(row_out_1_f_1)
 );
 PE #(.WIDTH(WIDTH)) pe_row_1_1(
     .clk(clk), .rst_n(rst_n), .switch(PE_switch),
     .load(PE_load), .iter(counter_r[3:0]), .subload(CORDIC_load),
-    .din_a_r(row_1_r_1),  .din_a_i(row_1_i_1),  .din_a_f(row_1_f_1),
-    .din_b_r(row_in_2_r_r), .din_b_i(row_in_2_i_r), .din_b_f(row_in_2_f_r),
-    .dout_x_r(row_1_r_2),   .dout_x_i(row_1_i_2),   .dout_x_f(row_1_f_2),
-    .dout_y_r(col_1_r_1),   .dout_y_i(col_1_i_1),   .dout_y_f(col_1_f_1)
+    .din_a_r(row_in_1_r_1),   .din_a_i(row_in_1_i_1),   .din_a_f(row_in_1_f_1),
+    .din_b_r(in_row_2_r_r),   .din_b_i(in_row_2_i_r),   .din_b_f(in_row_2_f_r),
+    .dout_x_r(row_out_1_r_2), .dout_x_i(row_out_1_i_2), .dout_x_f(row_out_1_f_2),
+    .dout_y_r(col_out_1_r_1), .dout_y_i(col_out_1_i_1), .dout_y_f(col_out_1_f_1)
 );
 PE #(.WIDTH(WIDTH)) pe_row_1_2(
     .clk(clk), .rst_n(rst_n), .switch(PE_switch),
     .load(PE_load), .iter(counter_r[3:0]), .subload(CORDIC_load),
-    .din_a_r(row_1_r_2),    .din_a_i(row_1_i_2),    .din_a_f(row_1_f_2),
-    .din_b_r(row_in_3_r_r), .din_b_i(row_in_3_i_r), .din_b_f(row_in_3_f_r),
-    .dout_x_r(row_1_r_3),   .dout_x_i(row_1_i_3),   .dout_x_f(row_1_f_3),
-    .dout_y_r(col_2_r_1),   .dout_y_i(col_2_i_1),   .dout_y_f(col_2_f_1)
+    .din_a_r(row_in_1_r_2),   .din_a_i(row_in_1_i_2),   .din_a_f(row_in_1_f_2),
+    .din_b_r(in_row_3_r_r),   .din_b_i(in_row_3_i_r),   .din_b_f(in_row_3_f_r),
+    .dout_x_r(row_out_1_r_3), .dout_x_i(row_out_1_i_3), .dout_x_f(row_out_1_f_3),
+    .dout_y_r(col_out_2_r_1), .dout_y_i(col_out_2_i_1), .dout_y_f(col_out_2_f_1)
 );
 PE #(.WIDTH(WIDTH)) pe_row_1_3(
     .clk(clk), .rst_n(rst_n), .switch(PE_switch),
     .load(PE_load), .iter(counter_r[3:0]), .subload(CORDIC_load),
-    .din_a_r(row_1_r_3),      .din_a_i(row_1_i_3),    .din_a_f(),
-    .din_b_r(row_in_4_r_r),   .din_b_i(row_in_4_i_r), .din_b_f(),
-    .dout_x_r(row_out_1_r),   .dout_x_i(row_out_1_i), .dout_x_f(),
-    .dout_y_r(col_3_r_1),     .dout_y_i(col_3_i_1),   .dout_y_f()
+    .din_a_r(row_in_1_r_3),   .din_a_i(row_in_1_i_3),   .din_a_f(),
+    .din_b_r(in_row_4_r_r),   .din_b_i(in_row_4_i_r),   .din_b_f(),
+    .dout_x_r(row_out_1_r_4), .dout_x_i(row_out_1_i_4), .dout_x_f(),
+    .dout_y_r(col_out_3_r_1), .dout_y_i(col_out_3_i_1), .dout_y_f()
 );
 
 /* 2nd row */
 DU #(.WIDTH(WIDTH)) du_row_2(
     .clk(clk), .load(DU_load),
-    .din_r(col_1_r_1),  .din_i(col_1_i_1),  .din_f(col_1_f_1),
-    .dout_r(row_2_r_2), .dout_i(row_2_i_2), .dout_f(row_2_f_2)
+    .din_r(col_in_1_r_1),  .din_i(col_in_1_i_1),  .din_f(col_in_1_f_1),
+    .dout_r(row_out_2_r_2), .dout_i(row_out_2_i_2), .dout_f(row_out_2_f_2)
 );
 PE #(.WIDTH(WIDTH)) pe_row_2_2(
     .clk(clk), .rst_n(rst_n), .switch(PE_switch),
     .load(PE_load), .iter(counter_r[3:0]), .subload(CORDIC_load),
-    .din_a_r(row_2_r_2),  .din_a_i(row_2_i_2),  .din_a_f(row_2_f_2),
-    .din_b_r(col_2_r_1),  .din_b_i(col_2_i_1),  .din_b_f(col_2_f_1),
-    .dout_x_r(row_2_r_3), .dout_x_i(row_2_i_3), .dout_x_f(row_2_f_3),
-    .dout_y_r(col_2_r_2), .dout_y_i(col_2_i_2), .dout_y_f(col_2_f_2)
+    .din_a_r(row_in_2_r_2), .din_a_i(row_in_2_i_2), .din_a_f(row_in_2_f_2),
+    .din_b_r(col_in_2_r_1), .din_b_i(col_in_2_i_1), .din_b_f(col_in_2_f_1),
+    .dout_x_r(row_out_2_r_3), .dout_x_i(row_out_2_i_3), .dout_x_f(row_out_2_f_3),
+    .dout_y_r(col_out_2_r_2), .dout_y_i(col_out_2_i_2), .dout_y_f(col_out_2_f_2)
 );
 PE #(.WIDTH(WIDTH)) pe_row_2_3(
     .clk(clk), .rst_n(rst_n), .switch(PE_switch),
-    .load(PE_load),.iter(counter_r[3:0]), .subload(CORDIC_load),
-    .din_a_r(row_2_r_3),    .din_a_i(row_2_i_3),    .din_a_f(),
-    .din_b_r(col_3_r_1),    .din_b_i(col_3_i_1),    .din_b_f(),
-    .dout_x_r(row_out_2_r), .dout_x_i(row_out_2_i), .dout_x_f(),
-    .dout_y_r(col_3_r_2),   .dout_y_i(col_3_i_2),   .dout_y_f()
+    .load(PE_load), .iter(counter_r[3:0]), .subload(CORDIC_load),
+    .din_a_r(row_in_2_r_3),   .din_a_i(row_in_2_i_3),   .din_a_f(),
+    .din_b_r(col_in_3_r_1),   .din_b_i(col_in_3_i_1),   .din_b_f(),
+    .dout_x_r(row_out_2_r_4), .dout_x_i(row_out_2_i_4), .dout_x_f(),
+    .dout_y_r(col_out_3_r_2), .dout_y_i(col_out_3_i_2), .dout_y_f()
 );
 
 /* 3rd row */
 DU #(.WIDTH(WIDTH)) du_row_3(
     .clk(clk), .load(DU_load),
-    .din_r(col_2_r_2),  .din_i(col_2_i_2),  .din_f(col_2_f_2),
-    .dout_r(row_3_r_3), .dout_i(row_3_i_3), .dout_f(row_3_f_3)
+    .din_r(col_in_2_r_2),   .din_i(col_in_2_i_2),   .din_f(col_in_2_f_2),
+    .dout_r(row_out_3_r_3), .dout_i(row_out_3_i_3), .dout_f(row_out_3_f_3)
 );
 PE #(.WIDTH(WIDTH)) pe_row_3_3(
     .clk(clk), .rst_n(rst_n), .switch(PE_switch),
     .load(PE_load), .iter(counter_r[3:0]), .subload(CORDIC_load),
-    .din_a_r(row_3_r_3),    .din_a_i(row_3_i_3),    .din_a_f(),
-    .din_b_r(col_3_r_2),    .din_b_i(col_3_i_2),    .din_b_f(),
-    .dout_x_r(row_out_3_r), .dout_x_i(row_out_3_i), .dout_x_f(),
-    .dout_y_r(row_out_4_r), .dout_y_i(row_out_4_i), .dout_y_f()
+    .din_a_r(row_in_3_r_3),   .din_a_i(row_in_3_i_3),   .din_a_f(),
+    .din_b_r(col_in_3_r_2),   .din_b_i(col_in_3_i_2),   .din_b_f(),
+    .dout_x_r(row_out_3_r_4), .dout_x_i(row_out_3_i_4), .dout_x_f(),
+    .dout_y_r(col_out_3_r_3), .dout_y_i(col_out_3_i_3), .dout_y_f()
+);
+
+/* 4th row */
+DU #(.WIDTH(WIDTH)) du_row_4(
+    .clk(clk), .load(DU_load),
+    .din_r(col_in_3_r_3),   .din_i(col_in_3_i_3),   .din_f(),
+    .dout_r(row_out_4_r_4), .dout_i(row_out_4_i_4), .dout_f()
 );
 
 /* Continuous assignment */
@@ -157,6 +179,11 @@ assign DU_load = counter_r == ITER_MAX-1;
 assign CORDIC_load = counter_r == ITER_MAX || counter_r == ITER_SWITCH;
 
 /* Output logic */
+assign {row_out_1_r, row_out_1_i} = {row_out_1_r_4, row_out_1_i_4};
+assign {row_out_2_r, row_out_2_i} = {row_out_2_r_4, row_out_2_i_4};
+assign {row_out_3_r, row_out_3_i} = {row_out_3_r_4, row_out_3_i_4};
+assign {row_out_4_r, row_out_4_i} = {row_out_4_r_4, row_out_4_i_4};
+
 assign in_ready = state_r == STATE_WAIT || counter_r == ITER_MAX-1;
 
 always @(*) begin
@@ -193,33 +220,72 @@ always @(posedge clk) begin
     end
 end
 
-// Input buffer
+// Interconnect
+assign {row_in_1_f_1, row_in_1_r_1, row_in_1_i_1} = {row_out_1_f_1, row_out_1_r_1, row_out_1_i_1};
+assign {row_in_1_f_2, row_in_1_r_2, row_in_1_i_2} = row_buf_1_1_r;
+assign {row_in_1_f_3, row_in_1_r_3, row_in_1_i_3} = row_buf_1_2_r;
+
+assign {row_in_2_f_2, row_in_2_r_2, row_in_2_i_2} = {row_out_2_f_2, row_out_2_r_2, row_out_2_i_2};
+assign {row_in_2_f_3, row_in_2_r_3, row_in_2_i_3} = row_buf_2_1_r;
+
+assign {row_in_3_f_3, row_in_3_r_3, row_in_3_i_3} = {row_out_3_f_3, row_out_3_r_3, row_out_3_i_3};
+
+assign {col_in_1_f_1, col_in_1_r_1, col_in_1_i_1} = {col_out_1_f_1, col_out_1_r_1, col_out_1_i_1};
+assign {col_in_2_f_2, col_in_2_r_2, col_in_2_i_2} = {col_out_2_f_2, col_out_2_r_2, col_out_2_i_2};
+assign {col_in_3_r_3, col_in_3_i_3} = {col_out_3_r_3, col_out_3_i_3};
+
+
 always @(*) begin
-    row_in_1_f_w = row_in_1_f;
-    row_in_2_f_w = row_in_2_f;
-    row_in_3_f_w = row_in_3_f;
-    row_in_1_r_w = row_in_1_r;
-    row_in_2_r_w = row_in_2_r;
-    row_in_3_r_w = row_in_3_r;
-    row_in_4_r_w = row_in_4_r;
-    row_in_1_i_w = row_in_1_i;
-    row_in_2_i_w = row_in_2_i;
-    row_in_3_i_w = row_in_3_i;
-    row_in_4_i_w = row_in_4_i;
+    row_buf_1_1_w = {row_out_1_f_2, row_out_1_r_2, row_out_1_i_2};
+    row_buf_1_2_w = {row_out_1_f_3, row_out_1_r_3, row_out_1_i_3};
+    row_buf_1_3_w = {1'b0, row_out_1_r_4, row_out_1_i_4};
+    row_buf_2_1_w = {row_out_2_f_3, row_out_2_r_3, row_out_2_i_3};
+    row_buf_2_2_w = {1'b0, row_out_2_r_4, row_out_2_i_4};
+    row_buf_3_1_w = {1'b0, row_out_3_r_4, row_out_3_i_4};
+    col_buf_1_2_w = {col_out_2_f_1, col_out_2_r_1, col_out_2_i_1};
+    col_buf_1_3_w = {1'b0, col_out_3_r_1, col_out_3_i_1};
+    col_buf_2_2_w = {1'b0, col_out_3_r_2, col_out_3_i_2};
 end
 
 always @(posedge clk) begin
-    row_in_1_f_r <= row_in_1_f_w;
-    row_in_2_f_r <= row_in_2_f_w;
-    row_in_3_f_r <= row_in_3_f_w;
-    row_in_1_r_r <= row_in_1_r_w;
-    row_in_2_r_r <= row_in_2_r_w;
-    row_in_3_r_r <= row_in_3_r_w;
-    row_in_4_r_r <= row_in_4_r_w;
-    row_in_1_i_r <= row_in_1_i_w;
-    row_in_2_i_r <= row_in_2_i_w;
-    row_in_3_i_r <= row_in_3_i_w;
-    row_in_4_i_r <= row_in_4_i_w;
+    row_buf_1_1_r <= row_buf_1_1_w;
+    row_buf_1_2_r <= row_buf_1_2_w;
+    row_buf_1_3_r <= row_buf_1_3_w;
+    row_buf_2_1_r <= row_buf_2_1_w;
+    row_buf_2_2_r <= row_buf_2_2_w;
+    row_buf_3_1_r <= row_buf_3_1_w;
+    col_buf_1_2_r <= col_buf_1_2_w;
+    col_buf_1_3_r <= col_buf_1_3_w;
+    col_buf_2_2_r <= col_buf_2_2_w;
+end
+
+// Input buffer
+always @(*) begin
+    in_row_1_f_w = row_in_1_f;
+    in_row_2_f_w = row_in_2_f;
+    in_row_3_f_w = row_in_3_f;
+    in_row_1_r_w = row_in_1_r;
+    in_row_2_r_w = row_in_2_r;
+    in_row_3_r_w = row_in_3_r;
+    in_row_4_r_w = row_in_4_r;
+    in_row_1_i_w = row_in_1_i;
+    in_row_2_i_w = row_in_2_i;
+    in_row_3_i_w = row_in_3_i;
+    in_row_4_i_w = row_in_4_i;
+end
+
+always @(posedge clk) begin
+    in_row_1_f_r <= in_row_1_f_w;
+    in_row_2_f_r <= in_row_2_f_w;
+    in_row_3_f_r <= in_row_3_f_w;
+    in_row_1_r_r <= in_row_1_r_w;
+    in_row_2_r_r <= in_row_2_r_w;
+    in_row_3_r_r <= in_row_3_r_w;
+    in_row_4_r_r <= in_row_4_r_w;
+    in_row_1_i_r <= in_row_1_i_w;
+    in_row_2_i_r <= in_row_2_i_w;
+    in_row_3_i_r <= in_row_3_i_w;
+    in_row_4_i_r <= in_row_4_i_w;
 end
 endmodule
 

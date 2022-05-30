@@ -113,17 +113,17 @@ initial begin
 		$fclose(fp_i);
 
 		for (l=0; l<11; l=l+1) begin
-			@(posedge clk)
+			@(negedge clk)
 			if (in_ready) begin
 				row_in_1_r = l < 8 ? H_r[0][l] : 0;
 				row_in_1_i = l < 8 ? H_i[0][l] : 0;
 				row_in_1_f = l == 0;
 				row_in_2_r = 0 < l && l < 9 ? H_r[1][l-1] : 0;
 				row_in_2_i = 0 < l && l < 9 ? H_i[1][l-1] : 0;
-				row_in_2_f = l == 1;
+				row_in_2_f = l == 2;
 				row_in_3_r = 1 < l && l < 10 ? H_r[2][l-2] : 0;
 				row_in_3_i = 1 < l && l < 10 ? H_i[2][l-2] : 0;
-				row_in_3_f = l == 2;
+				row_in_3_f = l == 4;
 				row_in_4_r = 2 < l ? H_r[3][l-3] : 0;
 				row_in_4_i = 2 < l ? H_i[3][l-3] : 0;
 			end
