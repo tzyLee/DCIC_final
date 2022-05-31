@@ -365,9 +365,11 @@ reg signed [WIDTH-1:0] cordic_1_x_r, cordic_1_x_w;
 reg signed [WIDTH-1:0] cordic_1_yz_r, cordic_1_yz_w;
 reg signed [WIDTH-1:0] cordic_2_x_r, cordic_2_x_w;
 reg signed [WIDTH-1:0] cordic_2_yz_r, cordic_2_yz_w;
+reg din_a_f_r, din_a_f_w;
+reg din_b_f_r, din_b_f_w;
 
 /* Wires */
-wire is_vec_mode;
+wire is_vec_mode, is_vec_mode_nxt;
 wire signed [WIDTH-1:0] cordic_1_x, cordic_2_x;
 wire signed [WIDTH-1:0] cordic_1_y, cordic_2_y;
 wire signed [WIDTH-1:0] cordic_1_z, cordic_2_z;
@@ -379,7 +381,8 @@ wire signed [WIDTH-1:0] cordic_1_z_out, cordic_2_z_out;
 // wire signed [WIDTH-1:0] cordic_1_x_load, cordic_2_x_load;
 // wire signed [WIDTH-1:0] cordic_1_yz_load, cordic_2_yz_load;
 
-assign is_vec_mode = din_a_f;
+assign is_vec_mode = din_a_f_r;
+assign is_vec_mode_nxt = din_a_f;
 
 // assign cordic_1_x_load = load ? din_a_r : cordic_1_x_r;
 // assign cordic_2_x_load = load ? din_a_i : cordic_2_x_r;
@@ -395,8 +398,8 @@ assign cordic_1_x = (switch ? din_a_r : cordic_1_x_out);
 assign cordic_2_x = (switch ? din_b_r : cordic_1_y_out);
 assign cordic_1_y = (switch ? din_a_i : cordic_2_x_out);
 assign cordic_2_y = (switch ? din_b_i : cordic_2_y_out);
-assign cordic_1_z = is_vec_mode ? 0 : (switch ? ang_a_r : ang_1_r);
-assign cordic_2_z = is_vec_mode ? 0 : (switch ? ang_b_r : ang_1_r);
+assign cordic_1_z = is_vec_mode_nxt ? 0 : (switch ? ang_a_r : ang_1_r);
+assign cordic_2_z = is_vec_mode_nxt ? 0 : (switch ? ang_b_r : ang_1_r);
 // TODO disable cordic_2 in the 2nd cycle of vectoring mode
 
 CORDIC #(.WIDTH(WIDTH)) cordic_1(
@@ -410,8 +413,6 @@ CORDIC #(.WIDTH(WIDTH)) cordic_2(
     .dout_x(cordic_2_x_out), .dout_y(cordic_2_y_out), .dout_z(cordic_2_z_out)
 );
 
-// TODO angles (needs negative value)
-
 always @(*) begin
     // angle can be retrieved 1 cycle before mult is finished
     ang_a_w = is_vec_mode && !switch && iter == 12 ? -cordic_1_z_out : ang_a_r;
@@ -419,24 +420,37 @@ always @(*) begin
     ang_1_w = is_vec_mode && switch && iter == 12 ? -cordic_1_z_out : ang_1_r;
 end
 
-// always @(*) begin
-//     cordic_1_x_w = cordic_1_x_out;
-//     cordic_2_x_w = cordic_2_x_out;
-// end
-// always @(*) begin
-//     cordic_1_yz_w = (is_vec_mode ? cordic_1_z_out : cordic_1_y_out);
-//     cordic_2_yz_w = (is_vec_mode ? cordic_2_z_out : cordic_2_y_out);
-// end
+always @(*) begin
+    din_a_f_w = load ? din_a_f : din_a_f_r;
+    din_b_f_w = load ? din_b_f : din_b_f_r;
+end
 
 // Output logic
-assign dout_x_f = din_a_f;
+assign dout_x_f = din_a_f_r;
 assign {dout_x_r, dout_x_i} = (
     is_vec_mode ? {cordic_1_x_out, {WIDTH{1'b0}}} : {cordic_1_x_out, cordic_2_x_out}
 );
-assign dout_y_f = din_b_f;
-assign {dout_y_f, dout_y_r, dout_y_i} = (
+assign dout_y_f = din_b_f_r;
+assign {dout_y_r, dout_y_i} = (
     is_vec_mode ? 0 : {cordic_1_y_out, cordic_2_y_out}
 );
+
+always @(posedge clk) begin
+    if (!rst_n) begin
+        din_a_f_r <= 0;
+    end
+    else begin
+        din_a_f_r <= din_a_f_w;
+    end
+end
+always @(posedge clk) begin
+    if (!rst_n) begin
+        din_b_f_r <= 0;
+    end
+    else begin
+        din_b_f_r <= din_b_f_w;
+    end
+end
 
 always @(posedge clk) begin
     if (!rst_n) begin
@@ -544,12 +558,13 @@ always @(*) begin
     4'b0011: begin x_prod = $signed('b1010001000) * x_r; y_prod = $signed('b1010001000) * y_r; end
     4'b0100: begin x_prod = $signed('b1001110100) * x_r; y_prod = $signed('b1001110100) * y_r; end
     4'b0101: begin x_prod = $signed('b1001101111) * x_r; y_prod = $signed('b1001101111) * y_r; end
+    4'b1111: begin x_prod = {x_r, {GAIN_WIDTH{1'b0}}}; y_prod = {y_r, {GAIN_WIDTH{1'b0}}}; end
     default: begin x_prod = $signed('b1001101110) * x_r; y_prod = $signed('b1001101110) * y_r; end
     endcase
 end
 
 assign dout_x = x_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH]; // remove fractions
-assign dout_y = y_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH]; // TODO handle no iteration
+assign dout_y = y_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH];
 assign dout_z = z_r;
 
 assign mode = (is_vec_mode && y_r > 0) || (!is_vec_mode && z_r < 0);
