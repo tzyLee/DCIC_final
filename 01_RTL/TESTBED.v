@@ -17,11 +17,24 @@ parameter IN_width		= 14;
 parameter TIMEOUT       = 1000;
 
 parameter CYCLE			= 10.0;
+parameter ERR_THRESHOLD = 6;
 
 reg signed [IN_width-1:0] din_r, din_i;
 
 integer H_r[0:H_size-1][0:2*H_size-1];
 integer H_i[0:H_size-1][0:2*H_size-1];
+integer R_gold_r[0:H_size-1][0:H_size-1];
+integer R_gold_i[0:H_size-1][0:H_size-1];
+integer QH_gold_r[0:H_size-1][0:H_size-1];
+integer QH_gold_i[0:H_size-1][0:H_size-1];
+integer R_r[0:H_size-1][0:H_size-1];
+integer R_i[0:H_size-1][0:H_size-1];
+integer QH_r[0:H_size-1][0:H_size-1];
+integer QH_i[0:H_size-1][0:H_size-1];
+integer QH_diff;
+integer R_diff;
+integer diff;
+integer first_output_received;
 
 reg clk, rst_n, in_valid;
 reg signed [IN_width-1:0] row_in_1_r, row_in_1_i;
@@ -29,6 +42,10 @@ reg signed [IN_width-1:0] row_in_2_r, row_in_2_i;
 reg signed [IN_width-1:0] row_in_3_r, row_in_3_i;
 reg signed [IN_width-1:0] row_in_4_r, row_in_4_i;
 reg row_in_1_f, row_in_2_f, row_in_3_f;
+wire signed [IN_width-1:0] row_out_1_r, row_out_1_i;
+wire signed [IN_width-1:0] row_out_2_r, row_out_2_i;
+wire signed [IN_width-1:0] row_out_3_r, row_out_3_i;
+wire signed [IN_width-1:0] row_out_4_r, row_out_4_i;
 wire in_ready;
 wire out_valid;
 
@@ -65,6 +82,7 @@ initial begin
 	clk = 0;
 	rst_n = 1;
 	in_valid = 0;
+	latency_total = 0;
 
 	for(i=0; i<dataset; i=i+1) begin
 
@@ -84,6 +102,7 @@ initial begin
 		@(negedge clk) rst_n = 0;
 		@(negedge clk) rst_n = 1;
 
+		$display("============= Input Matrix H =============");
 		for(j=0; j<H_size; j=j+1) begin
 			for(k=0; k<H_size; k=k+1) begin
 				count_r = $fscanf(fp_r, "%b", din_r);
@@ -108,12 +127,112 @@ initial begin
 				H_r[j][3], H_i[j][3]
 			);
 		end
-
 		$fclose(fp_r);
 		$fclose(fp_i);
 
-		for (l=0; l<11; l=l+1) begin
-			@(negedge clk)
+		// Read golden data
+		case(i)
+		0: begin
+			fp_r = $fopen("../TEST_PATTERN/out_R_real_golden01.txt", "r");
+			fp_i = $fopen("../TEST_PATTERN/out_R_imag_golden01.txt", "r");
+		end
+		default: begin
+			$display("Missing dataset.");
+			$finish;
+		end
+		endcase
+		$display("============= Expected R =============");
+		for(j=0; j<H_size; j=j+1) begin
+			for(k=0; k<H_size; k=k+1) begin
+				count_r = $fscanf(fp_r, "%b", din_r);
+				count_i = $fscanf(fp_i, "%b", din_i);
+
+				R_gold_r[j][k] = din_r;
+				R_gold_i[j][k] = din_i;
+			end
+			$display(
+				"[%5d+%5dj %5d+%5dj %5d+%5dj %5d+%5dj]",
+				R_gold_r[j][0], R_gold_i[j][0],
+				R_gold_r[j][1], R_gold_i[j][1],
+				R_gold_r[j][2], R_gold_i[j][2],
+				R_gold_r[j][3], R_gold_i[j][3]
+			);
+		end
+		$fclose(fp_r);
+		$fclose(fp_i);
+
+		case(i)
+		0: begin
+			fp_r = $fopen("../TEST_PATTERN/out_QH_real_golden01.txt", "r");
+			fp_i = $fopen("../TEST_PATTERN/out_QH_imag_golden01.txt", "r");
+		end
+		default: begin
+			$display("Missing dataset.");
+			$finish;
+		end
+		endcase
+		$display("============= Expected QH =============");
+		for(j=0; j<H_size; j=j+1) begin
+			for(k=0; k<H_size; k=k+1) begin
+				count_r = $fscanf(fp_r, "%b", din_r);
+				count_i = $fscanf(fp_i, "%b", din_i);
+
+				QH_gold_r[j][k] = din_r;
+				QH_gold_i[j][k] = din_i;
+			end
+			$display(
+				"[%5d+%5dj %5d+%5dj %5d+%5dj %5d+%5dj]",
+				QH_gold_r[j][0], QH_gold_i[j][0],
+				QH_gold_r[j][1], QH_gold_i[j][1],
+				QH_gold_r[j][2], QH_gold_i[j][2],
+				QH_gold_r[j][3], QH_gold_i[j][3]
+			);
+		end
+		$fclose(fp_r);
+		$fclose(fp_i);
+
+		first_output_received = 0;
+		latency = 0;
+		for (l=0; l<22; l=l+1) begin
+			@(negedge clk);
+			if (out_valid) begin
+				if (l > 4 && l < 9) begin
+					R_r[0][l-5] = row_out_1_r;
+					R_i[0][l-5] = row_out_1_i;
+					first_output_received = 1;
+				end
+				else if (l > 8 && l < 13) begin
+					QH_r[0][l-9] = row_out_1_r;
+					QH_i[0][l-9] = row_out_1_i;
+				end
+
+				if (l > 5 && l < 10) begin
+					R_r[1][l-6] = row_out_2_r;
+					R_i[1][l-6] = row_out_2_i;
+				end
+				else if (l > 9 && l < 14) begin
+					QH_r[1][l-10] = row_out_2_r;
+					QH_i[1][l-10] = row_out_2_i;
+				end
+
+				if (l > 6 && l < 11) begin
+					R_r[2][l-7] = row_out_3_r;
+					R_i[2][l-7] = row_out_3_i;
+				end
+				else if (l > 10 && l < 15) begin
+					QH_r[2][l-11] = row_out_3_r;
+					QH_i[2][l-11] = row_out_3_i;
+				end
+
+				if (l > 7 && l < 12) begin
+					R_r[3][l-8] = row_out_4_r;
+					R_i[3][l-8] = row_out_4_i;
+				end
+				else if (l > 11 && l < 16) begin
+					QH_r[3][l-12] = row_out_4_r;
+					QH_i[3][l-12] = row_out_4_i;
+				end
+			end
 			if (in_ready) begin
 				row_in_1_r = l < 8 ? H_r[0][l] : 0;
 				row_in_1_i = l < 8 ? H_i[0][l] : 0;
@@ -130,79 +249,89 @@ initial begin
 			else begin
 				l = l-1; // do not increment
 			end
+
+			if (first_output_received == 0) begin
+				latency = latency + 1;
+			end
 		end
 
-		wait(out_valid);
-		latency = 0;
-		while(!out_valid) begin
-			@(negedge clk) latency = latency + 1;
-			// if(latency > latency_limit) begin
-			// 	$display("Latency too long (> %0d CYCLEs)", latency_limit);
-			// 	$finish;
-			// end
+		// wait(out_valid);
+		// latency = 0;
+		// while(!out_valid) begin
+		// 	@(negedge clk) latency = latency + 1;
+		// 	// if(latency > latency_limit) begin
+		// 	// 	$display("Latency too long (> %0d CYCLEs)", latency_limit);
+		// 	// 	$finish;
+		// 	// end
+		// end
+		$display("============= Actual R =============");
+		for(j=0; j<H_size; j=j+1) begin
+			$display(
+				"[%5d+%5dj %5d+%5dj %5d+%5dj %5d+%5dj]",
+				R_r[j][0], R_i[j][0],
+				R_r[j][1], R_i[j][1],
+				R_r[j][2], R_i[j][2],
+				R_r[j][3], R_i[j][3]
+			);
+		end
+		$display("============= Actual QH =============");
+		for(j=0; j<H_size; j=j+1) begin
+			$display(
+				"[%5d+%5dj %5d+%5dj %5d+%5dj %5d+%5dj]",
+				QH_r[j][0], QH_i[j][0],
+				QH_r[j][1], QH_i[j][1],
+				QH_r[j][2], QH_i[j][2],
+				QH_r[j][3], QH_i[j][3]
+			);
 		end
 
-		// // Read golden data
-        // case(i)
-        // 0: begin
-        //     fp_r = $fopen("../Test_pattern/output/OUT_real_16_pattern01.txt", "r");
-        //     fp_i = $fopen("../Test_pattern/output/OUT_imag_16_pattern01.txt", "r");
-        // end
-        // default: begin
-        //     $display("Wrong dataset!? No Way!");
-        //     $finish;
-        // end
-        // endcase
+		QH_diff = 0;
+		R_diff = 0;
+		for(j=0; j<H_size; j=j+1) begin
+			for(k=0; k<H_size; k=k+1) begin
+				diff = QH_r[j][k] - QH_gold_r[j][k];
+				diff = (diff < 0 ? -diff : diff); // absolute value
+				QH_diff = QH_diff + diff;
+				if (diff > ERR_THRESHOLD) begin
+					$display("QH_r[%2d][%2d] = %d (Expected) != %d (Actual); diff = %d",
+							 j, k, QH_gold_r[j][k], QH_r[j][k], diff);
+					$finish;
+				end
 
-		// for(j=0;j<QRD_size;j=j+1) begin
+				diff = QH_i[j][k] - QH_gold_i[j][k];
+				diff = (diff < 0 ? -diff : diff);
+				QH_diff = QH_diff + diff;
+				if (diff > ERR_THRESHOLD) begin
+					$display("QH_i[%2d][%2d] = %d (Expected) != %d (Actual); diff = %d",
+							 j, k, QH_gold_i[j][k], QH_i[j][k], diff);
+					$finish;
+				end
 
-		// 	while(!out_valid) begin
-		// 		@(negedge clk) latency = latency + 1;
-		// 		if(latency > latency_limit) begin
-		// 			$display("Total latency too long (> %0d CYCLEs)", latency_limit);
-		// 			$finish;
-		// 		end
-		// 	end
+				diff = R_r[j][k] - R_gold_r[j][k];
+				diff = (diff < 0 ? -diff : diff);
+				R_diff = R_diff + diff;
+				if (diff > ERR_THRESHOLD) begin
+					$display("R_r[%2d][%2d] = %d (Expected) != %d (Actual); diff = %d",
+							 j, k, R_gold_r[j][k], R_r[j][k], diff);
+					$finish;
+				end
 
-		// 	int_r = $fscanf(fp_r, "%d", gold_r);
-		// 	int_i = $fscanf(fp_i, "%d", gold_i);
+				diff = R_i[j][k] - R_gold_i[j][k];
+				diff = (diff < 0 ? -diff : diff);
+				R_diff = R_diff + diff;
+				if (diff > ERR_THRESHOLD) begin
+					$display("R_i[%2d][%2d] = %d (Expected) != %d (Actual); diff = %d",
+							 j, k, R_gold_i[j][k], R_i[j][k], diff);
+					$finish;
+				end
+			end
+		end
 
-		// 	signal = gold_r;
-		// 	signal_energy = signal_energy + signal*signal;
-		// 	signal = gold_i;
-		// 	signal_energy = signal_energy + signal*signal;
+		$display("=========================");
+		$display("QH_diff: %d, R_diff: %d", QH_diff, R_diff);
+		$display("=========================");
 
-		// 	noise = gold_r - dout_r;
-		// 	noise_energy = noise_energy + noise*noise;
-        //     $display("[%2d] GET dout_r %d, gold %d, differ %d", j, dout_r, gold_r, noise);
-		// 	noise = gold_i - dout_i;
-		// 	noise_energy = noise_energy + noise*noise;
-        //     $display("[%2d] GET dout_i %d, gold %d, differ %d", j, dout_i, gold_i, noise);
-		// 	@(negedge clk);
-		// end
-
-		// if(noise_energy == 0) begin
-		// 	$display(" ---------- SNR = infinity");
-		// 	$display(" ---------- dataset %2d pass!!\n", i+1);
-		// end
-		// else begin
-
-		// 	SNR_ratio = signal_energy/noise_energy;
-		// 	$display(" ---------- SNR = %2.2f", $log10(SNR_ratio)*10.0);
-
-		// 	if(SNR_ratio >= 10000)
-        //         $display(" ---------- dataset %2d passed!!\n", i+1);
-		// 	else begin
-		// 		$display(" ---------- dataset %2d failed!! Bye\n", i+1);
-		// 		$finish;
-		// 	end
-		// end
-
-		$fclose(fp_r);
-		$fclose(fp_i);
-
-		// latency_total = latency_total + latency;
-
+		latency_total = latency_total + latency;
 	end
 
 	$display("\033[1;33m********************************\033[m");
@@ -233,15 +362,11 @@ QRD QRD_CORE(
     .row_in_3_r (row_in_3_r), .row_in_3_i(row_in_3_i), .row_in_3_f(row_in_3_f),
     .row_in_4_r (row_in_4_r), .row_in_4_i(row_in_4_i),
 	.in_ready   (in_ready  ),
-	.out_valid  (),
-	.row_out_1_r(),
-	.row_out_1_i(),
-	.row_out_2_r(),
-	.row_out_2_i(),
-	.row_out_3_r(),
-	.row_out_3_i(),
-	.row_out_4_r(),
-	.row_out_4_i()
+	.out_valid  (out_valid),
+	.row_out_1_r(row_out_1_r), .row_out_1_i(row_out_1_i),
+	.row_out_2_r(row_out_2_r), .row_out_2_i(row_out_2_i),
+	.row_out_3_r(row_out_3_r), .row_out_3_i(row_out_3_i),
+	.row_out_4_r(row_out_4_r), .row_out_4_i(row_out_4_i)
 );
 
 endmodule

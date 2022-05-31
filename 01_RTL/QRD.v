@@ -29,10 +29,10 @@ input signed [WIDTH-1:0] row_in_1_r, row_in_1_i,
                          row_in_2_r, row_in_2_i,
                          row_in_3_r, row_in_3_i,
                          row_in_4_r, row_in_4_i;
-input signed [WIDTH-1:0] row_out_1_r, row_out_1_i,
-                         row_out_2_r, row_out_2_i,
-                         row_out_3_r, row_out_3_i,
-                         row_out_4_r, row_out_4_i;
+output signed [WIDTH-1:0] row_out_1_r, row_out_1_i,
+                          row_out_2_r, row_out_2_i,
+                          row_out_3_r, row_out_3_i,
+                          row_out_4_r, row_out_4_i;
 output in_ready;
 output out_valid;
 
@@ -72,8 +72,9 @@ wire signed [WIDTH-1:0] row_out_2_r_4, row_out_2_i_4;
 
 wire signed [WIDTH-1:0] row_in_3_r_3, row_out_3_r_3, row_in_3_i_3, row_out_3_i_3;
 wire signed [WIDTH-1:0] row_out_3_r_4, row_out_3_i_4;
+wire signed [WIDTH-1:0] row_out_4_r_4, row_out_4_i_4;
 
-wire row_in_1_f_1, row_out_1_f_1, row_in_1_f_2, row_out_1_f_2, row_in_1_f_3, row_out_1_f_3;
+wire row_in_1_f_1, row_out_1_f_1, row_in_1_f_2, row_out_1_f_2, row_in_1_f_3, row_out_1_f_3, row_out_1_f_4;
 wire row_in_2_f_2, row_out_2_f_2, row_in_2_f_3, row_out_2_f_3;
 wire row_in_3_f_3, row_out_3_f_3;
 // Column-wise wire
@@ -86,7 +87,6 @@ wire signed [WIDTH-1:0] col_in_2_r_2, col_out_2_r_2, col_in_2_i_2, col_out_2_i_2
 
 wire signed [WIDTH-1:0] col_in_1_r_1, col_out_1_r_1, col_in_1_i_1, col_out_1_i_1;
 
-wire col_in_3_f_1, col_out_3_f_1, col_in_3_f_2, col_out_3_f_2, col_in_3_f_3, col_out_3_f_3;
 wire col_in_2_f_1, col_out_2_f_1, col_in_2_f_2, col_out_2_f_2;
 wire col_in_1_f_1, col_out_1_f_1;
 // Pipeline control
@@ -96,6 +96,7 @@ wire PE_switch, PE_load, DU_load, CORDIC_load;
 reg [3:0] state_r, state_w;
 
 reg [4:0] counter_r, counter_w;
+reg start_output_r, start_output_w;
 
 /* 1st row */
 DU #(.WIDTH(WIDTH)) du_row_1(
@@ -124,7 +125,7 @@ PE #(.WIDTH(WIDTH)) pe_row_1_3(
     .load(PE_load), .iter(counter_r[3:0]), .subload(CORDIC_load),
     .din_a_r(row_in_1_r_3),   .din_a_i(row_in_1_i_3),   .din_a_f(row_in_1_f_3),
     .din_b_r(in_row_4_r_r),   .din_b_i(in_row_4_i_r),   .din_b_f(),
-    .dout_x_r(row_out_1_r_4), .dout_x_i(row_out_1_i_4), .dout_x_f(),
+    .dout_x_r(row_out_1_r_4), .dout_x_i(row_out_1_i_4), .dout_x_f(row_out_1_f_4),
     .dout_y_r(col_out_3_r_1), .dout_y_i(col_out_3_i_1), .dout_y_f()
 );
 
@@ -187,6 +188,7 @@ assign {row_out_4_r, row_out_4_i} = {row_out_4_r_4, row_out_4_i_4};
 
 assign in_ready = (state_r == STATE_WAIT && counter_r != ITER_LAST) ||
                   counter_r == ITER_LAST-1;
+assign out_valid = counter_r == ITER_LAST && start_output_r;
 
 always @(*) begin
     case (state_r)
@@ -219,6 +221,18 @@ always @(posedge clk) begin
     end
     else begin
         state_r <= state_w;
+    end
+end
+
+always @(*) begin
+    start_output_w = row_out_1_f_4 || start_output_r;
+end
+always @(posedge clk) begin
+    if (!rst_n) begin
+        start_output_r <= 0;
+    end
+    else begin
+        start_output_r <= start_output_w;
     end
 end
 
@@ -366,10 +380,6 @@ output signed [WIDTH-1:0] dout_x_r, dout_x_i,
 reg signed [WIDTH-1:0] ang_a_r, ang_a_w,
                        ang_b_r, ang_b_w,
                        ang_1_r, ang_1_w;
-reg signed [WIDTH-1:0] cordic_1_x_r, cordic_1_x_w;
-reg signed [WIDTH-1:0] cordic_1_yz_r, cordic_1_yz_w;
-reg signed [WIDTH-1:0] cordic_2_x_r, cordic_2_x_w;
-reg signed [WIDTH-1:0] cordic_2_yz_r, cordic_2_yz_w;
 reg din_a_f_r, din_a_f_w;
 reg din_b_f_r, din_b_f_w;
 
@@ -383,21 +393,8 @@ wire signed [WIDTH-1:0] cordic_1_x_out, cordic_2_x_out;
 wire signed [WIDTH-1:0] cordic_1_y_out, cordic_2_y_out;
 wire signed [WIDTH-1:0] cordic_1_z_out, cordic_2_z_out;
 
-// wire signed [WIDTH-1:0] cordic_1_x_load, cordic_2_x_load;
-// wire signed [WIDTH-1:0] cordic_1_yz_load, cordic_2_yz_load;
-
 assign is_vec_mode = din_a_f_r;
 assign is_vec_mode_nxt = din_a_f;
-
-// assign cordic_1_x_load = load ? din_a_r : cordic_1_x_r;
-// assign cordic_2_x_load = load ? din_a_i : cordic_2_x_r;
-// assign cordic_1_yz_load = load ? din_b_r : cordic_1_yz_r;
-// assign cordic_2_yz_load = load ? din_b_i : cordic_2_yz_r;
-
-// assign cordic_1_x = (switch ? cordic_1_x_load : din_a_r);
-// assign cordic_2_x = (switch ? cordic_1_yz_load : din_b_r);
-// assign cordic_1_y = (switch ? cordic_2_x_load : din_a_i);
-// assign cordic_2_y = (switch ? cordic_2_yz_load : din_b_i);
 
 assign cordic_1_x = (switch ? din_a_r : cordic_1_x_out);
 assign cordic_2_x = (switch ? din_b_r : cordic_1_y_out);
@@ -483,28 +480,6 @@ always @(posedge clk) begin
         ang_1_r <= ang_1_w;
     end
 end
-always @(posedge clk) begin
-    cordic_1_x_r  <= cordic_1_x_w;
-end
-always @(posedge clk) begin
-    if (!rst_n) begin
-        cordic_1_yz_r <= 0;
-    end
-    else begin
-        cordic_1_yz_r <= cordic_1_yz_w;
-    end
-end
-always @(posedge clk) begin
-    cordic_2_x_r  <= cordic_2_x_w;
-end
-always @(posedge clk) begin
-    if (!rst_n) begin
-        cordic_2_yz_r <= 0;
-    end
-    else begin
-        cordic_2_yz_r <= cordic_2_yz_w;
-    end
-end
 endmodule
 
 module CORDIC(
@@ -527,7 +502,7 @@ parameter GAIN_WIDTH = 10; // 10 fraction bits
 input clk, is_vec_mode, nxt_mode, load;
 input [3:0] iter;
 input signed [WIDTH-1:0] din_x, din_y, din_z;
-input signed [WIDTH-1:0] dout_x, dout_y, dout_z;
+output signed [WIDTH-1:0] dout_x, dout_y, dout_z;
 
 reg signed [WIDTH-1:0] x_r, x_w;
 reg signed [WIDTH-1:0] y_r, y_w;
@@ -544,7 +519,7 @@ wire din_z_neg_out, din_z_pos_out;
 wire signed [WIDTH-1:0] din_x_fixed;
 wire signed [WIDTH-1:0] din_y_fixed;
 wire signed [WIDTH-1:0] din_z_fixed;
-wire mode;
+wire mode, update;
 
 always @(*) begin
     case (iter)
