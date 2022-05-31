@@ -93,7 +93,7 @@ initial begin
 
 				// Fill identity matrix
 				if (j == k) begin
-					H_r[j][k+4] = 1;
+					H_r[j][k+4] = 1024; // 10 bit fraction -> 1 == 1024
 				end
 				else begin
 					H_r[j][k+4] = 0;

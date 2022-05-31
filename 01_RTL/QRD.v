@@ -17,6 +17,7 @@ parameter ITER = 32;
 parameter HALF_ITER = 16;
 parameter ITER_SWITCH = 13; // 13 -> 16 (13th iteration for CORDIC mult)
 parameter ITER_MAX = ITER-1;
+parameter ITER_LAST = HALF_ITER+ITER_SWITCH;
 
 localparam STATE_IDLE = 0;
 localparam STATE_WAIT = 1;
@@ -174,9 +175,9 @@ DU #(.WIDTH(WIDTH)) du_row_4(
 
 /* Continuous assignment */
 assign PE_switch = counter_r[4];
-assign PE_load = counter_r == ITER_MAX;
-assign DU_load = counter_r == ITER_MAX-1;
-assign CORDIC_load = counter_r == ITER_MAX || counter_r == ITER_SWITCH;
+assign PE_load = counter_r == ITER_LAST;
+assign DU_load = counter_r == ITER_LAST-1;
+assign CORDIC_load = counter_r == ITER_LAST || counter_r == ITER_SWITCH;
 
 /* Output logic */
 assign {row_out_1_r, row_out_1_i} = {row_out_1_r_4, row_out_1_i_4};
@@ -184,20 +185,21 @@ assign {row_out_2_r, row_out_2_i} = {row_out_2_r_4, row_out_2_i_4};
 assign {row_out_3_r, row_out_3_i} = {row_out_3_r_4, row_out_3_i_4};
 assign {row_out_4_r, row_out_4_i} = {row_out_4_r_4, row_out_4_i_4};
 
-assign in_ready = state_r == STATE_WAIT || counter_r == ITER_MAX-1;
+assign in_ready = (state_r == STATE_WAIT && counter_r != ITER_LAST) ||
+                  counter_r == ITER_LAST-1;
 
 always @(*) begin
     case (state_r)
     STATE_IDLE:  counter_w = counter_r;
-    STATE_WAIT:  counter_w = counter_r+1;
-    STATE_CALC:  counter_w = counter_r == ITER_MAX ? 0 :
+    STATE_WAIT:  counter_w = counter_r == ITER_LAST ? 0 : counter_r+1;
+    STATE_CALC:  counter_w = counter_r == ITER_LAST ? 0 :
                              counter_r == ITER_SWITCH ? 16 :
                              counter_r+1;
     endcase
 end
 always @(posedge clk) begin
     if (!rst_n) begin
-        counter_r <= -3;
+        counter_r <= -5;
     end
     else begin
         counter_r <= counter_w;
@@ -207,7 +209,7 @@ end
 always @(*) begin
     case (state_r)
     STATE_IDLE: state_w = STATE_WAIT;
-    STATE_WAIT: state_w = counter_r == ITER_MAX-1 ? STATE_CALC : STATE_WAIT;
+    STATE_WAIT: state_w = counter_r == ITER_LAST ? STATE_CALC : STATE_WAIT;
     STATE_CALC: state_w = STATE_CALC;
     endcase
 end
@@ -393,8 +395,9 @@ assign cordic_1_x = (switch ? din_a_r : cordic_1_x_out);
 assign cordic_2_x = (switch ? din_b_r : cordic_1_y_out);
 assign cordic_1_y = (switch ? din_a_i : cordic_2_x_out);
 assign cordic_2_y = (switch ? din_b_i : cordic_2_y_out);
-assign cordic_1_z = is_vec_mode ? 0 : (switch ? ang_1_r : ang_a_r);
-assign cordic_2_z = is_vec_mode ? 0 : (switch ? ang_1_r : ang_b_r);
+assign cordic_1_z = is_vec_mode ? 0 : (switch ? ang_a_r : ang_1_r);
+assign cordic_2_z = is_vec_mode ? 0 : (switch ? ang_b_r : ang_1_r);
+// TODO disable cordic_2 in the 2nd cycle of vectoring mode
 
 CORDIC #(.WIDTH(WIDTH)) cordic_1(
     .clk(clk), .is_vec_mode(is_vec_mode), .load(subload), .iter(iter),
@@ -409,6 +412,13 @@ CORDIC #(.WIDTH(WIDTH)) cordic_2(
 
 // TODO angles (needs negative value)
 
+always @(*) begin
+    // angle can be retrieved 1 cycle before mult is finished
+    ang_a_w = is_vec_mode && !switch && iter == 12 ? -cordic_1_z_out : ang_a_r;
+    ang_b_w = is_vec_mode && !switch && iter == 12 ? -cordic_2_z_out : ang_b_r;
+    ang_1_w = is_vec_mode && switch && iter == 12 ? -cordic_1_z_out : ang_1_r;
+end
+
 // always @(*) begin
 //     cordic_1_x_w = cordic_1_x_out;
 //     cordic_2_x_w = cordic_2_x_out;
@@ -417,6 +427,16 @@ CORDIC #(.WIDTH(WIDTH)) cordic_2(
 //     cordic_1_yz_w = (is_vec_mode ? cordic_1_z_out : cordic_1_y_out);
 //     cordic_2_yz_w = (is_vec_mode ? cordic_2_z_out : cordic_2_y_out);
 // end
+
+// Output logic
+assign dout_x_f = din_a_f;
+assign {dout_x_r, dout_x_i} = (
+    is_vec_mode ? {cordic_1_x_out, {WIDTH{1'b0}}} : {cordic_1_x_out, cordic_2_x_out}
+);
+assign dout_y_f = din_b_f;
+assign {dout_y_f, dout_y_r, dout_y_i} = (
+    is_vec_mode ? 0 : {cordic_1_y_out, cordic_2_y_out}
+);
 
 always @(posedge clk) begin
     if (!rst_n) begin
@@ -428,7 +448,7 @@ always @(posedge clk) begin
 end
 always @(posedge clk) begin
     if (!rst_n) begin
-        ang_a_r <= 0;
+        ang_b_r <= 0;
     end
     else begin
         ang_b_r <= ang_b_w;
@@ -436,7 +456,7 @@ always @(posedge clk) begin
 end
 always @(posedge clk) begin
     if (!rst_n) begin
-        ang_a_r <= 0;
+        ang_1_r <= 0;
     end
     else begin
         ang_1_r <= ang_1_w;
@@ -495,7 +515,7 @@ reg [3:0] last_iter_r, last_iter_w;
 wire signed [WIDTH-1:0] x_sft, y_sft;
 wire signed [WIDTH-1:0] x_nxt, y_nxt, z_nxt;
 
-reg [WIDTH+GAIN_WIDTH-1:0] x_prod, y_prod;
+reg signed [WIDTH+GAIN_WIDTH-1:0] x_prod, y_prod;
 wire mode;
 
 always @(*) begin
@@ -519,12 +539,12 @@ end
 
 always @(*) begin
     case(last_iter_r)
-    4'b0001: begin x_prod = 'b1111111111 * x_r; y_prod = 'b1111111111 * y_r; end
-    4'b0010: begin x_prod = 'b1011010100 * x_r; y_prod = 'b1011010100 * y_r; end
-    4'b0011: begin x_prod = 'b1010001000 * x_r; y_prod = 'b1010001000 * y_r; end
-    4'b0100: begin x_prod = 'b1001110100 * x_r; y_prod = 'b1001110100 * y_r; end
-    4'b0101: begin x_prod = 'b1001101111 * x_r; y_prod = 'b1001101111 * y_r; end
-    default: begin x_prod = 'b1001101110 * x_r; y_prod = 'b1001101110 * y_r; end
+    4'b0001: begin x_prod = $signed('b1111111111) * x_r; y_prod = $signed('b1111111111) * y_r; end
+    4'b0010: begin x_prod = $signed('b1011010100) * x_r; y_prod = $signed('b1011010100) * y_r; end
+    4'b0011: begin x_prod = $signed('b1010001000) * x_r; y_prod = $signed('b1010001000) * y_r; end
+    4'b0100: begin x_prod = $signed('b1001110100) * x_r; y_prod = $signed('b1001110100) * y_r; end
+    4'b0101: begin x_prod = $signed('b1001101111) * x_r; y_prod = $signed('b1001101111) * y_r; end
+    default: begin x_prod = $signed('b1001101110) * x_r; y_prod = $signed('b1001101110) * y_r; end
     endcase
 end
 
@@ -541,7 +561,7 @@ assign z_nxt = mode ? (z_r + dz) : (z_r - dz);
 BarrelShifter #(.WIDTH(WIDTH)) shift1 (.din(x_r), .shift(iter), .dout(x_sft));
 BarrelShifter #(.WIDTH(WIDTH)) shift2 (.din(y_r), .shift(iter), .dout(y_sft));
 
-always @(*) begin
+always @(*) begin // TODO handling values out of convergence
     x_w = load ? din_x : (update ? x_nxt : x_r);
     y_w = load ? din_y : (update ? y_nxt : y_r);
     z_w = load ? din_z : (update ? z_nxt : z_r);
