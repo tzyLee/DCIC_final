@@ -197,6 +197,7 @@ always @(*) begin
     STATE_CALC:  counter_w = counter_r == ITER_LAST ? 0 :
                              counter_r == ITER_SWITCH ? 16 :
                              counter_r+1;
+    default:     counter_w = counter_r;
     endcase
 end
 always @(posedge clk) begin
@@ -213,11 +214,12 @@ always @(*) begin
     STATE_IDLE: state_w = STATE_WAIT;
     STATE_WAIT: state_w = counter_r == ITER_LAST ? STATE_CALC : STATE_WAIT;
     STATE_CALC: state_w = STATE_CALC;
+    default:    state_w = STATE_IDLE;
     endcase
 end
 always @(posedge clk) begin
     if (!rst_n) begin
-        state_r <= 0;
+        state_r <= STATE_IDLE;
     end
     else begin
         state_r <= state_w;
