@@ -3,30 +3,29 @@
 Report : area
 Design : QRD
 Version: R-2020.09-SP5
-Date   : Wed Jun  1 13:50:53 2022
+Date   : Wed Jun  1 17:32:26 2022
 ****************************************
 
 Information: Updating design information... (UID-85)
-Warning: Design 'QRD' contains 1 high-fanout nets. A fanout number of 1000 will be used for delay calculations involving these nets. (TIM-134)
 Library(s) Used:
 
     slow (File: /home/raid7_2/course/cvsd/CBDK_IC_Contest/CIC/SynopsysDC/db/slow.db)
 
-Number of ports:                         1243
-Number of nets:                         20029
-Number of cells:                        16881
-Number of combinational cells:          15699
-Number of sequential cells:              1150
+Number of ports:                         1251
+Number of nets:                         19980
+Number of cells:                        16810
+Number of combinational cells:          15623
+Number of sequential cells:              1152
 Number of macros/black boxes:               0
-Number of buf/inv:                       1437
-Number of references:                      85
+Number of buf/inv:                       1412
+Number of references:                      87
 
-Combinational area:             172348.905119
-Buf/Inv area:                     5012.422122
-Noncombinational area:           30802.718365
+Combinational area:             172101.084769
+Buf/Inv area:                     4908.880723
+Noncombinational area:           30829.876766
 Macro/Black Box area:                0.000000
 Net Interconnect area:      undefined  (No wire load specified)
 
-Total cell area:                203151.623484
+Total cell area:                202930.961535
 Total area:                 undefined
 1

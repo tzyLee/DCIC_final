@@ -92,6 +92,9 @@ wire col_in_1_f_1, col_out_1_f_1;
 // Pipeline control
 wire PE_switch, PE_load, DU_load, CORDIC_load;
 
+// Clock gating
+wire pipeline_clk, input_clk;
+
 // Registers
 reg [3:0] state_r, state_w;
 
@@ -173,6 +176,10 @@ DU #(.WIDTH(WIDTH)) du_row_4(
     .din_r(col_in_3_r_3),   .din_i(col_in_3_i_3),   .din_f(),
     .dout_r(row_out_4_r_4), .dout_i(row_out_4_i_4), .dout_f()
 );
+
+/* Clock gating */
+assign pipeline_clk = clk & ((counter_r == ITER_LAST) || (counter_r == ITER_LAST-1));
+assign input_clk = clk & (state_r == STATE_WAIT || (counter_r == ITER_LAST) || (counter_r == ITER_LAST-1));
 
 /* Continuous assignment */
 assign PE_switch = counter_r[4];
@@ -270,7 +277,7 @@ always @(*) begin
     col_buf_2_2_w = {1'b0, col_out_3_r_2, col_out_3_i_2};
 end
 
-always @(posedge clk) begin
+always @(posedge pipeline_clk) begin
     row_buf_1_1_r <= row_buf_1_1_w;
     row_buf_1_2_r <= row_buf_1_2_w;
     row_buf_1_3_r <= row_buf_1_3_w;
@@ -297,7 +304,7 @@ always @(*) begin
     in_row_4_i_w = row_in_4_i;
 end
 
-always @(posedge clk) begin
+always @(posedge input_clk) begin
     in_row_1_f_r <= in_row_1_f_w;
     in_row_2_f_r <= in_row_2_f_w;
     in_row_3_f_r <= in_row_3_f_w;

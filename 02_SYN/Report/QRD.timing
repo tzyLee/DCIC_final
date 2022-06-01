@@ -6,17 +6,15 @@ Report : timing
         -max_paths 1
 Design : QRD
 Version: R-2020.09-SP5
-Date   : Wed Jun  1 13:50:57 2022
+Date   : Wed Jun  1 17:32:30 2022
 ****************************************
-
- # A fanout number of 1000 was used for high fanout net computations.
 
 Operating Conditions: slow   Library: slow
 Wire Load Model Mode: top
 
-  Startpoint: counter_r_reg[0]
+  Startpoint: counter_r_reg[1]
               (rising edge-triggered flip-flop clocked by clk)
-  Endpoint: pe_row_2_3/cordic_2/y_r_reg[13]
+  Endpoint: pe_row_1_3/cordic_1/x_r_reg[13]
             (rising edge-triggered flip-flop clocked by clk)
   Path Group: clk
   Path Type: max
@@ -25,55 +23,60 @@ Wire Load Model Mode: top
   --------------------------------------------------------------------------
   clock clk (rise edge)                                   0.00       0.00
   clock network delay (ideal)                             0.00       0.00
-  counter_r_reg[0]/CK (DFFHQX8)                           0.00 #     0.00 r
-  counter_r_reg[0]/Q (DFFHQX8)                            0.28       0.28 f
-  U1473/Y (INVX1)                                         0.08       0.37 r
-  U1428/Y (NAND2X1)                                       0.08       0.45 f
-  U1751/Y (NOR2X2)                                        0.13       0.57 r
-  U1508/Y (BUFX12)                                        0.22       0.79 r
-  pe_row_2_3/cordic_2/load (CORDIC_WIDTH14_2)             0.00       0.79 r
-  pe_row_2_3/cordic_2/U78/Y (NAND2BX1)                    0.19       0.98 r
-  pe_row_2_3/cordic_2/U202/Y (NOR2XL)                     0.08       1.06 f
-  pe_row_2_3/cordic_2/U345/Y (NOR2XL)                     0.27       1.32 r
-  pe_row_2_3/cordic_2/U89/Y (INVX3)                       0.23       1.56 f
-  pe_row_2_3/cordic_2/U365/Y (XOR2X1)                     0.20       1.76 f
-  pe_row_2_3/cordic_2/U75/Y (INVX1)                       0.51       2.27 r
-  pe_row_2_3/cordic_2/U577/Y (NOR2BX1)                    0.12       2.39 f
-  pe_row_2_3/cordic_2/U580/S (ADDFXL)                     0.55       2.94 f
-  pe_row_2_3/cordic_2/U4/CO (ADDFXL)                      0.57       3.52 f
-  pe_row_2_3/cordic_2/U8/CO (ADDFXL)                      0.38       3.89 f
-  pe_row_2_3/cordic_2/U32/CO (ADDFXL)                     0.38       4.27 f
-  pe_row_2_3/cordic_2/U589/CO (ADDFXL)                    0.35       4.62 f
-  pe_row_2_3/cordic_2/U840/Y (OAI21XL)                    0.11       4.73 r
-  pe_row_2_3/cordic_2/U829/Y (OAI2BB1X1)                  0.09       4.82 f
-  pe_row_2_3/cordic_2/U587/CO (ADDFXL)                    0.37       5.19 f
-  pe_row_2_3/cordic_2/U850/CO (ADDFX1)                    0.28       5.47 f
-  pe_row_2_3/cordic_2/U845/CO (ADDFXL)                    0.37       5.83 f
-  pe_row_2_3/cordic_2/U795/CO (ADDFXL)                    0.39       6.22 f
-  pe_row_2_3/cordic_2/U835/CO (ADDFX1)                    0.28       6.51 f
-  pe_row_2_3/cordic_2/U811/CO (ADDFXL)                    0.37       6.87 f
-  pe_row_2_3/cordic_2/U1083/CO (ADDFXL)                   0.39       7.26 f
-  pe_row_2_3/cordic_2/U827/CO (ADDFX2)                    0.31       7.57 f
-  pe_row_2_3/cordic_2/U565/CO (ADDFXL)                    0.36       7.94 f
-  pe_row_2_3/cordic_2/U818/CO (ADDFXL)                    0.39       8.33 f
-  pe_row_2_3/cordic_2/U814/CO (ADDFX2)                    0.31       8.64 f
-  pe_row_2_3/cordic_2/U810/CO (ADDFHX1)                   0.23       8.87 f
-  pe_row_2_3/cordic_2/U1077/CO (ADDFHX1)                  0.24       9.11 f
-  pe_row_2_3/cordic_2/U806/CO (ADDFX2)                    0.30       9.40 f
-  pe_row_2_3/cordic_2/U266/Y (XNOR2X1)                    0.15       9.56 f
-  pe_row_2_3/cordic_2/U756/Y (OAI211XL)                   0.20       9.75 r
-  pe_row_2_3/cordic_2/y_r_reg[13]/D (DFFQX1)              0.00       9.75 r
-  data arrival time                                                  9.75
+  counter_r_reg[1]/CK (DFFHQX8)                           0.00       0.00 r
+  counter_r_reg[1]/Q (DFFHQX8)                            0.27       0.27 f
+  pe_row_1_3/cordic_1/iter[1] (CORDIC_WIDTH14_7)          0.00       0.27 f
+  pe_row_1_3/cordic_1/U23/Y (INVX1)                       0.14       0.41 r
+  pe_row_1_3/cordic_1/U324/Y (NAND2X2)                    0.19       0.59 f
+  pe_row_1_3/cordic_1/U73/Y (NOR2X2)                      0.13       0.72 r
+  pe_row_1_3/cordic_1/U653/Y (INVXL)                      0.06       0.78 f
+  pe_row_1_3/cordic_1/U663/Y (NOR2X1)                     0.10       0.89 r
+  pe_row_1_3/cordic_1/U325/Y (NAND2BX1)                   0.11       1.00 f
+  pe_row_1_3/cordic_1/U82/Y (NOR2XL)                      0.23       1.23 r
+  pe_row_1_3/cordic_1/U26/Y (INVXL)                       0.19       1.42 f
+  pe_row_1_3/cordic_1/U80/Y (NAND3X2)                     0.13       1.55 r
+  pe_row_1_3/cordic_1/U345/Y (XOR2XL)                     0.17       1.71 f
+  pe_row_1_3/cordic_1/U641/Y (INVXL)                      0.60       2.31 r
+  pe_row_1_3/cordic_1/U927/Y (OAI22XL)                    0.15       2.46 f
+  pe_row_1_3/cordic_1/U6/S (ADDFXL)                       0.69       3.15 f
+  pe_row_1_3/cordic_1/U259/CO (ADDFXL)                    0.55       3.70 f
+  pe_row_1_3/cordic_1/U838/Y (OAI21XL)                    0.11       3.82 r
+  pe_row_1_3/cordic_1/U830/Y (OAI2BB1X1)                  0.07       3.89 f
+  pe_row_1_3/cordic_1/U817/Y (OAI21XL)                    0.10       3.98 r
+  pe_row_1_3/cordic_1/U761/Y (OAI2BB1X1)                  0.07       4.05 f
+  pe_row_1_3/cordic_1/U746/Y (OAI21XL)                    0.10       4.15 r
+  pe_row_1_3/cordic_1/U721/Y (OAI2BB1X1)                  0.07       4.22 f
+  pe_row_1_3/cordic_1/U715/Y (OAI21XL)                    0.10       4.32 r
+  pe_row_1_3/cordic_1/U714/Y (OAI2BB1X1)                  0.09       4.40 f
+  pe_row_1_3/cordic_1/U936/CO (ADDFXL)                    0.36       4.76 f
+  pe_row_1_3/cordic_1/U318/CO (ADDFXL)                    0.38       5.14 f
+  pe_row_1_3/cordic_1/U46/CO (ADDFXL)                     0.38       5.51 f
+  pe_row_1_3/cordic_1/U1089/CO (ADDFXL)                   0.39       5.90 f
+  pe_row_1_3/cordic_1/U45/CO (ADDFX1)                     0.28       6.18 f
+  pe_row_1_3/cordic_1/U1081/CO (ADDFXL)                   0.37       6.55 f
+  pe_row_1_3/cordic_1/U308/CO (ADDFXL)                    0.38       6.93 f
+  pe_row_1_3/cordic_1/U1074/CO (ADDFXL)                   0.37       7.29 f
+  pe_row_1_3/cordic_1/U1070/CO (ADDFHX1)                  0.25       7.54 f
+  pe_row_1_3/cordic_1/U309/CO (ADDFXL)                    0.36       7.90 f
+  pe_row_1_3/cordic_1/U1063/CO (ADDFXL)                   0.38       8.28 f
+  pe_row_1_3/cordic_1/U1059/CO (ADDFXL)                   0.38       8.65 f
+  pe_row_1_3/cordic_1/U1055/CO (ADDFXL)                   0.37       9.02 f
+  pe_row_1_3/cordic_1/U1103/CO (ADDFHX1)                  0.25       9.27 f
+  pe_row_1_3/cordic_1/U940/Y (XOR2X1)                     0.14       9.41 f
+  pe_row_1_3/cordic_1/U76/Y (AOI21XL)                     0.18       9.58 r
+  pe_row_1_3/cordic_1/U943/Y (NAND2BX1)                   0.06       9.65 f
+  pe_row_1_3/cordic_1/x_r_reg[13]/D (DFFQX1)              0.00       9.65 f
+  data arrival time                                                  9.65
 
   clock clk (rise edge)                                  10.00      10.00
   clock network delay (ideal)                             0.00      10.00
   clock uncertainty                                      -0.10       9.90
-  pe_row_2_3/cordic_2/y_r_reg[13]/CK (DFFQX1)             0.00       9.90 r
-  library setup time                                     -0.15       9.75
-  data required time                                                 9.75
+  pe_row_1_3/cordic_1/x_r_reg[13]/CK (DFFQX1)             0.00       9.90 r
+  library setup time                                     -0.25       9.65
+  data required time                                                 9.65
   --------------------------------------------------------------------------
-  data required time                                                 9.75
-  data arrival time                                                 -9.75
+  data required time                                                 9.65
+  data arrival time                                                 -9.65
   --------------------------------------------------------------------------
   slack (MET)                                                        0.00
 

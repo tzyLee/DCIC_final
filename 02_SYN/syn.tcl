@@ -40,8 +40,8 @@ uniquify
 set_fix_multiple_port_nets -all -buffer_constants  [get_designs *]
 set_fix_hold [all_clocks]
 
-# replace_clock_gates -global
-# set_ideal_network -no_propagate [get_nets *_clk]
+replace_clock_gates -global
+set_ideal_network -no_propagate [get_nets *_clk]
 
 compile_ultra
 compile_ultra -incremental
@@ -51,9 +51,9 @@ optimize_netlist -area
 optimize_netlist -area
 optimize_netlist -area
 
-# report_clock_gating
-# report_clock_gating -gating_elements
-# report_clock_gating -ungated -verbose
+report_clock_gating
+report_clock_gating -gating_elements
+report_clock_gating -ungated -verbose
 
 report_area > Report/$DESIGN\.area
 report_power > Report/$DESIGN\.power
