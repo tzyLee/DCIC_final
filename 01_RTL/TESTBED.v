@@ -298,7 +298,7 @@ initial begin
 				diff = QH_r[j][k] - QH_gold_r[j][k];
 				diff = (diff < 0 ? -diff : diff); // absolute value
 				QH_diff = QH_diff + diff;
-				if (diff > ERR_THRESHOLD) begin
+				if (diff > ERR_THRESHOLD || ^diff === 1'bx) begin
 					$display("QH_r[%2d][%2d] = %d (Expected) != %d (Actual); diff = %d",
 							 j, k, QH_gold_r[j][k], QH_r[j][k], diff);
 					$finish;
@@ -307,7 +307,7 @@ initial begin
 				diff = QH_i[j][k] - QH_gold_i[j][k];
 				diff = (diff < 0 ? -diff : diff);
 				QH_diff = QH_diff + diff;
-				if (diff > ERR_THRESHOLD) begin
+				if (diff > ERR_THRESHOLD || ^diff === 1'bx) begin
 					$display("QH_i[%2d][%2d] = %d (Expected) != %d (Actual); diff = %d",
 							 j, k, QH_gold_i[j][k], QH_i[j][k], diff);
 					$finish;
@@ -316,14 +316,14 @@ initial begin
 				diff = R_r[j][k] - R_gold_r[j][k];
 				diff = (diff < 0 ? -diff : diff);
 				R_diff = R_diff + diff;
-				if (diff > ERR_THRESHOLD) begin
+				if (diff > ERR_THRESHOLD || ^diff === 1'bx) begin
 					$display("R_r[%2d][%2d] = %d (Expected) != %d (Actual); diff = %d",
 							 j, k, R_gold_r[j][k], R_r[j][k], diff);
 					$finish;
 				end
 
 				diff = R_i[j][k] - R_gold_i[j][k];
-				diff = (diff < 0 ? -diff : diff);
+				diff = (diff < 0 ? -diff : diff || ^diff === 1'bx);
 				R_diff = R_diff + diff;
 				if (diff > ERR_THRESHOLD) begin
 					$display("R_i[%2d][%2d] = %d (Expected) != %d (Actual); diff = %d",

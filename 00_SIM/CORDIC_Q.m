@@ -4,14 +4,21 @@ function [x_out, y_out, z_out] = CORDIC_Q(x, y, z, mode, iter)
 %     FRAC_LEN = 13;
 %     GAIN_WORD_LEN = 19;
 %     GAIN_FRAC_LEN = 15;
-
     dz = fi(atan(2.^-(0:iter-1)), 1, get(x, 'WordLength'), get(x, 'FractionLength'));
+
+    qgain = zeros(iter+1, 1);
+    qgain(1) = 1;
+    for i = 0:iter-1
+        qgain(i+2) = qgain(i+1)*(1/sqrt(1+2^(-2*i)));
+    end
+    qgain = fi(qgain, 0, 10, 10);
 
 %    x = fi(x, 1, WORD_LEN, FRAC_LEN);
 %    y = fi(y, 1, WORD_LEN, FRAC_LEN);
 %    z = fi(z, 1, WORD_LEN, FRAC_LEN);
     x_n = x;
     y_n = y;
+    z = fi(z, 1, get(x, 'WordLength'), get(x, 'FractionLength'));
     z_n = z;
 %     gain = 1/1.64676025812082;
 %     gain = fi(1, 0, GAIN_WORD_LEN, GAIN_FRAC_LEN, F);
@@ -19,7 +26,16 @@ function [x_out, y_out, z_out] = CORDIC_Q(x, y, z, mode, iter)
 
     x_inv = 0;
     y_inv = 0;
-    if z < -pi/2 || z > pi/2
+%     if z < -pi/2 || z > pi/2
+%         if z < 0
+%             z(:) = z + pi;
+%         else
+%             z(:) = z - pi;
+%         end
+%         x_inv = 1;
+%         y_inv = 1;
+%     end
+    if z < -1.7433 || z > 1.7433
         if z < 0
             z(:) = z + pi;
         else
@@ -28,7 +44,6 @@ function [x_out, y_out, z_out] = CORDIC_Q(x, y, z, mode, iter)
         x_inv = 1;
         y_inv = 1;
     end
-
     if mode == "rotation"
 %         if abs(z) > 1.7433
 %             error("z is not in convergence range");
