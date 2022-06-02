@@ -44,7 +44,7 @@ replace_clock_gates -global
 set_ideal_network -no_propagate [get_nets *_clk]
 
 compile_ultra
-compile_ultra -incremental
+# compile_ultra -incremental
 optimize_netlist -area
 optimize_netlist -area
 optimize_netlist -area

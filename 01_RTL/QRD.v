@@ -515,7 +515,7 @@ output signed [WIDTH-1:0] dout_x, dout_y, dout_z;
 reg signed [WIDTH-1:0] x_r, x_w;
 reg signed [WIDTH-1:0] y_r, y_w;
 reg signed [WIDTH-1:0] z_r, z_w, dz, dz2;
-reg [3:0] last_iter_r, last_iter_w;
+reg should_mult_r, should_mult_w;
 reg xy_inv_r, xy_inv_w;
 
 wire signed [WIDTH-1:0] x_sft, y_sft;
@@ -563,15 +563,14 @@ always @(*) begin
 end
 
 always @(*) begin
-    case(last_iter_r)
-    4'b0001: begin x_prod = $signed('b1111111111) * x_mult; y_prod = $signed('b1111111111) * y_mult; end
-    4'b0010: begin x_prod = $signed('b1011010100) * x_mult; y_prod = $signed('b1011010100) * y_mult; end
-    4'b0011: begin x_prod = $signed('b1010001000) * x_mult; y_prod = $signed('b1010001000) * y_mult; end
-    4'b0100: begin x_prod = $signed('b1001110100) * x_mult; y_prod = $signed('b1001110100) * y_mult; end
-    4'b0101: begin x_prod = $signed('b1001101111) * x_mult; y_prod = $signed('b1001101111) * y_mult; end
-    4'b1111: begin x_prod = {x_mult, {GAIN_WIDTH{1'b0}}}; y_prod = {y_mult, {GAIN_WIDTH{1'b0}}}; end
-    default: begin x_prod = $signed('b1001101110) * x_mult; y_prod = $signed('b1001101110) * y_mult; end
-    endcase
+    if (should_mult_r) begin
+        x_prod = $signed('b1001101110) * x_mult;
+        y_prod = $signed('b1001101110) * y_mult;
+    end
+    else begin
+        x_prod = {x_mult, {GAIN_WIDTH{1'b0}}};
+        y_prod = {y_mult, {GAIN_WIDTH{1'b0}}};
+    end
 end
 
 assign x_mult = update1 ? (xy_inv_r ? -x_nxt : x_nxt) : (xy_inv_r ? -x_r : x_r);
@@ -628,21 +627,37 @@ always @(*) begin
         iter == 6 ? x_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] : // remove fractions
         update ? x_update : (xy_inv_r ? -x_r : x_r)
     );
+end
+always @(*) begin
     y_w = load ? din_y_fixed : (
         iter == 6 ? y_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] :
         update ? y_update : (xy_inv_r ? -y_r : y_r)
     );
+end
+always @(*) begin
     z_w = load ? din_z_fixed : (update ? z_update : z_r);
-    last_iter_w = load ? -1 : (update ? (update2 ? last_iter_r+2 : last_iter_r+1) : last_iter_r);
+end
+always @(*) begin
+    should_mult_w = load ? 0 : (update || should_mult_r);
+end
+always @(*) begin
     xy_inv_w = load ? (din_z_neg_out || din_z_pos_out) :
                update && iter != 6 ? xy_inv_r : 0; // Reset when the x y is negated
 end
 
 always @(posedge clk) begin
     x_r <= x_w;
+end
+always @(posedge clk) begin
     y_r <= y_w;
+end
+always @(posedge clk) begin
     z_r <= z_w;
-    last_iter_r <= last_iter_w;
+end
+always @(posedge clk) begin
+    should_mult_r <= should_mult_w;
+end
+always @(posedge clk) begin
     xy_inv_r <= xy_inv_w;
 end
 endmodule
