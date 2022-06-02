@@ -7,7 +7,7 @@ Report : power
         -analysis_effort low
 Design : QRD
 Version: R-2020.09-SP5
-Date   : Thu Jun  2 14:58:50 2022
+Date   : Thu Jun  2 15:10:08 2022
 ****************************************
 
 
@@ -29,12 +29,12 @@ Power-specific unit information :
     Leakage Power Units = 1pW
 
 
-  Cell Internal Power  =   2.6344 mW   (85%)
-  Net Switching Power  = 472.6596 uW   (15%)
+  Cell Internal Power  =   2.4128 mW   (91%)
+  Net Switching Power  = 239.7622 uW    (9%)
                          ---------
-Total Dynamic Power    =   3.1070 mW  (100%)
+Total Dynamic Power    =   2.6526 mW  (100%)
 
-Cell Leakage Power     = 133.2254 uW
+Cell Leakage Power     =  94.1210 uW
 
 
                  Internal         Switching           Leakage            Total
@@ -43,10 +43,10 @@ Power Group      Power            Power               Power              Power  
 io_pad             0.0000            0.0000            0.0000            0.0000  (   0.00%)
 memory             0.0000            0.0000            0.0000            0.0000  (   0.00%)
 black_box          0.0000            0.0000            0.0000            0.0000  (   0.00%)
-clock_network  5.0212e-03            0.0000        5.2546e+04        5.0738e-03  (   0.16%)
-register           1.7835        2.3860e-02        2.1185e+07            1.8286  (  56.43%)
+clock_network      0.0000            0.0000            0.0000            0.0000  (   0.00%)
+register           1.9700        2.7053e-02        2.0944e+07            2.0180  (  73.47%)
 sequential         0.0000            0.0000            0.0000            0.0000  (   0.00%)
-combinational      0.8458            0.4488        1.1199e+08            1.4066  (  43.41%)
+combinational      0.4428            0.2127        7.3177e+07            0.7287  (  26.53%)
 --------------------------------------------------------------------------------------------------
-Total              2.6344 mW         0.4727 mW     1.3323e+08 pW         3.2403 mW
+Total              2.4128 mW         0.2398 mW     9.4121e+07 pW         2.7467 mW
 1
