@@ -6,7 +6,7 @@ Report : timing
         -max_paths 1
 Design : QRD
 Version: R-2020.09-SP5
-Date   : Thu Jun  2 15:10:08 2022
+Date   : Thu Jun  2 15:18:49 2022
 ****************************************
 
  # A fanout number of 1000 was used for high fanout net computations.
@@ -14,9 +14,9 @@ Date   : Thu Jun  2 15:10:08 2022
 Operating Conditions: slow   Library: slow
 Wire Load Model Mode: top
 
-  Startpoint: counter_r_reg[4]
+  Startpoint: counter_r_reg[0]
               (rising edge-triggered flip-flop clocked by clk)
-  Endpoint: pe_row_2_3/cordic_2/x_r_reg[13]
+  Endpoint: pe_row_1_3/cordic_1/y_r_reg[13]
             (rising edge-triggered flip-flop clocked by clk)
   Path Group: clk
   Path Type: max
@@ -25,46 +25,47 @@ Wire Load Model Mode: top
   --------------------------------------------------------------------------
   clock clk (rise edge)                                   0.00       0.00
   clock network delay (ideal)                             0.00       0.00
-  counter_r_reg[4]/CK (DFFQX1)                            0.00 #     0.00 r
-  counter_r_reg[4]/Q (DFFQX1)                             0.60       0.60 r
-  U8666/Y (CLKINVX1)                                      0.63       1.23 f
-  U8667/Y (NOR2XL)                                        0.98       2.21 r
-  U8668/Y (AOI22XL)                                       0.17       2.38 f
-  U6074/Y (INVXL)                                         0.14       2.52 r
-  U8669/Y (NAND2XL)                                       0.08       2.60 f
-  U8163/Y (INVXL)                                         0.08       2.68 r
-  U8670/Y (NAND2XL)                                       0.22       2.90 f
-  U5615/Y (NAND2XL)                                       0.29       3.19 r
-  U5636/Y (CLKINVX1)                                      0.39       3.57 f
-  U8101/Y (NAND2X1)                                       0.55       4.13 r
-  U12812/Y (XOR2X1)                                       0.32       4.44 f
-  DP_OP_944J1_167_6798/U15/CO (ADDFXL)                    0.38       4.82 f
-  DP_OP_944J1_167_6798/U14/CO (ADDFXL)                    0.38       5.20 f
-  DP_OP_944J1_167_6798/U13/CO (ADDFXL)                    0.38       5.58 f
-  DP_OP_944J1_167_6798/U12/CO (ADDFXL)                    0.38       5.95 f
-  DP_OP_944J1_167_6798/U11/CO (ADDFXL)                    0.38       6.33 f
-  DP_OP_944J1_167_6798/U10/CO (ADDFXL)                    0.38       6.70 f
-  DP_OP_944J1_167_6798/U9/CO (ADDFXL)                     0.38       7.08 f
-  DP_OP_944J1_167_6798/U8/CO (ADDFXL)                     0.38       7.46 f
-  DP_OP_944J1_167_6798/U7/CO (ADDFXL)                     0.38       7.83 f
-  DP_OP_944J1_167_6798/U6/CO (ADDFXL)                     0.38       8.21 f
-  DP_OP_944J1_167_6798/U5/CO (ADDFXL)                     0.39       8.60 f
-  DP_OP_944J1_167_6798/U4/CO (ADDFX1)                     0.28       8.88 f
-  DP_OP_944J1_167_6798/U3/CO (ADDFXL)                     0.36       9.24 f
-  U14828/Y (XOR2X1)                                       0.15       9.40 f
-  U14834/Y (AO21X1)                                       0.25       9.64 f
-  pe_row_2_3/cordic_2/x_r_reg[13]/D (DFFQX1)              0.00       9.64 f
-  data arrival time                                                  9.64
+  counter_r_reg[0]/CK (DFFQX2)                            0.00 #     0.00 r
+  counter_r_reg[0]/Q (DFFQX2)                             0.30       0.30 r
+  U10734/Y (NAND2XL)                                      0.07       0.37 f
+  U6374/Y (INVX1)                                         0.09       0.47 r
+  U10322/Y (INVXL)                                        0.23       0.70 f
+  U6452/Y (NOR2XL)                                        0.27       0.97 r
+  U8830/Y (CLKINVX2)                                      0.55       1.52 f
+  U15590/Y (OAI22XL)                                      0.30       1.81 r
+  U15592/Y (AOI211XL)                                     0.09       1.91 f
+  U15594/Y (OAI211XL)                                     0.14       2.04 r
+  U15596/Y (AOI211XL)                                     0.09       2.13 f
+  U15601/Y (OAI222XL)                                     0.37       2.50 r
+  U15602/Y (XOR2X1)                                       0.22       2.72 r
+  U6146/Y (INVXL)                                         0.09       2.81 f
+  U15606/Y (OAI21X1)                                      0.17       2.98 r
+  U15625/Y (AOI21X1)                                      0.13       3.11 f
+  U15642/Y (OAI21X1)                                      0.16       3.27 r
+  U15657/Y (AOI21X1)                                      0.11       3.39 f
+  U15667/Y (OAI21XL)                                      0.23       3.62 r
+  U6861/Y (AOI21XL)                                       0.16       3.77 f
+  U15686/Y (OAI21XL)                                      0.25       4.02 r
+  U7727/Y (AOI21XL)                                       0.16       4.18 f
+  U15702/Y (OAI21XL)                                      0.27       4.45 r
+  U6864/Y (AOI21XL)                                       0.16       4.62 f
+  U15879/Y (OAI21XL)                                      0.28       4.89 r
+  U7570/Y (AOI21XL)                                       0.17       5.06 f
+  U15969/Y (OAI21XL)                                      0.23       5.28 r
+  U15973/Y (XOR2X1)                                       0.20       5.48 f
+  U15977/Y (NAND2BX1)                                     0.17       5.65 f
+  pe_row_1_3/cordic_1/y_r_reg[13]/D (DFFQX1)              0.00       5.65 f
+  data arrival time                                                  5.65
 
-  clock clk (rise edge)                                  10.00      10.00
-  clock network delay (ideal)                             0.00      10.00
-  clock uncertainty                                      -0.10       9.90
-  pe_row_2_3/cordic_2/x_r_reg[13]/CK (DFFQX1)             0.00       9.90 r
-  library setup time                                     -0.26       9.64
-  data required time                                                 9.64
+  clock clk (rise edge)                                   6.00       6.00
+  clock network delay (ideal)                             0.00       6.00
+  clock uncertainty                                      -0.10       5.90
+  pe_row_1_3/cordic_1/y_r_reg[13]/CK (DFFQX1)             0.00       5.90 r
+  library setup time                                     -0.25       5.65
+  data required time                                                 5.65
   --------------------------------------------------------------------------
-  data required time                                                 9.64
-  data arrival time                                                 -9.64
+  data required time                                                 5.65
+  data arrival time                                                 -5.65
   --------------------------------------------------------------------------
   slack (MET)                                                        0.00
 
