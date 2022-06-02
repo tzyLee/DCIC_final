@@ -15,7 +15,7 @@ Information: Total simulation time = 2400.000000 ns
 Report : Time Based Power
 Design : QRD
 Version: T-2022.03
-Date   : Thu Jun  2 12:13:13 2022
+Date   : Thu Jun  2 14:59:55 2022
 ****************************************
 
 
@@ -30,24 +30,24 @@ Power Group             Power     Power      Power      Power   (     %)  Attrs
 --------------------------------------------------------------------------------
 clock_network              0.0000    0.0000    0.0000    0.0000 ( 0.00%)  
 register                   0.0000    0.0000    0.0000    0.0000 ( 0.00%)  i
-combinational           3.639e-03 2.048e-03 1.654e-04 5.852e-03 (71.00%)  
-sequential              2.300e-03 6.847e-05 2.206e-05 2.390e-03 (29.00%)  
+combinational           3.658e-03 1.949e-03 1.120e-04 5.719e-03 (71.85%)  
+sequential              2.163e-03 5.647e-05 2.124e-05 2.240e-03 (28.15%)  
 memory                     0.0000    0.0000    0.0000    0.0000 ( 0.00%)  
 io_pad                     0.0000    0.0000    0.0000    0.0000 ( 0.00%)  
 black_box                  0.0000    0.0000    0.0000    0.0000 ( 0.00%)  
 
-  Net Switching Power  = 2.116e-03   (25.67%)
-  Cell Internal Power  = 5.939e-03   (72.05%)
-  Cell Leakage Power   = 1.875e-04   ( 2.27%)
-    Intrinsic Leakage  = 1.875e-04
+  Net Switching Power  = 2.005e-03   (25.19%)
+  Cell Internal Power  = 5.821e-03   (73.13%)
+  Cell Leakage Power   = 1.332e-04   ( 1.67%)
+    Intrinsic Leakage  = 1.332e-04
     Gate Leakage       =    0.0000
                          ---------
-Total Power            = 8.242e-03  (100.00%)
+Total Power            = 7.960e-03  (100.00%)
 
-X Transition Power     = 6.869e-05
+X Transition Power     = 7.591e-05
 Glitching Power        =    0.0000
 
-Peak Power             =    0.0510
+Peak Power             =    0.0594
 Peak Time              =   1426.00
 
 1
