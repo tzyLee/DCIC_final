@@ -15,8 +15,7 @@ module QRD(
 parameter WIDTH = 14;
 parameter ITER = 32;
 parameter HALF_ITER = 16;
-parameter ITER_SWITCH = 14; // 14 -> 16 (13th iteration for CORDIC mult)
-parameter ITER_MAX = ITER-1;
+parameter ITER_SWITCH = 8; // 14 -> 16 (13th iteration for CORDIC mult)
 parameter ITER_LAST = HALF_ITER+ITER_SWITCH;
 
 localparam STATE_IDLE = 0;
@@ -209,7 +208,7 @@ always @(*) begin
 end
 always @(posedge clk) begin
     if (!rst_n) begin
-        counter_r <= -4;
+        counter_r <= -10;
     end
     else begin
         counter_r <= counter_w;
@@ -428,9 +427,9 @@ CORDIC #(.WIDTH(WIDTH)) cordic_2(
 
 always @(*) begin
     // angle can be retrieved 1 cycle before mult is finished
-    ang_a_w = is_vec_mode && !switch && iter == 13 ? -cordic_1_z_out : ang_a_r;
-    ang_b_w = is_vec_mode && !switch && iter == 13 ? -cordic_2_z_out : ang_b_r;
-    ang_1_w = is_vec_mode && switch && iter == 13 ? -cordic_1_z_out : ang_1_r;
+    ang_a_w = is_vec_mode && !switch && iter == 7 ? -cordic_1_z_out : ang_a_r;
+    ang_b_w = is_vec_mode && !switch && iter == 7 ? -cordic_2_z_out : ang_b_r;
+    ang_1_w = is_vec_mode && switch && iter == 7 ? -cordic_1_z_out : ang_1_r;
 end
 
 always @(*) begin
@@ -515,12 +514,18 @@ output signed [WIDTH-1:0] dout_x, dout_y, dout_z;
 
 reg signed [WIDTH-1:0] x_r, x_w;
 reg signed [WIDTH-1:0] y_r, y_w;
-reg signed [WIDTH-1:0] z_r, z_w, dz;
+reg signed [WIDTH-1:0] z_r, z_w, dz, dz2;
 reg [3:0] last_iter_r, last_iter_w;
 reg xy_inv_r, xy_inv_w;
 
 wire signed [WIDTH-1:0] x_sft, y_sft;
 wire signed [WIDTH-1:0] x_nxt, y_nxt, z_nxt;
+
+wire signed [WIDTH-1:0] x_sft2, y_sft2;
+wire signed [WIDTH-1:0] x_nxt2, y_nxt2, z_nxt2;
+
+wire signed [WIDTH-1:0] x_mult, y_mult;
+wire signed [WIDTH-1:0] x_update, y_update, z_update;
 
 reg signed [WIDTH+GAIN_WIDTH-1:0] x_prod, y_prod;
 wire din_x_is_neg, din_y_is_neg;
@@ -528,48 +533,71 @@ wire din_z_neg_out, din_z_pos_out;
 wire signed [WIDTH-1:0] din_x_fixed;
 wire signed [WIDTH-1:0] din_y_fixed;
 wire signed [WIDTH-1:0] din_z_fixed;
-wire mode, update;
+wire mode, mode2;
+wire update, update1, update2;
+wire [3:0] iter2;
 
 always @(*) begin
     case (iter)
     4'b0000: dz = 'b00001100100100;
-    4'b0001: dz = 'b00000111011011;
-    4'b0010: dz = 'b00000011111011;
-    4'b0011: dz = 'b00000001111111;
-    4'b0100: dz = 'b00000001000000;
-    4'b0101: dz = 'b00000000100000;
-    4'b0110: dz = 'b00000000010000;
-    4'b0111: dz = 'b00000000001000;
-    4'b1000: dz = 'b00000000000100;
-    4'b1001: dz = 'b00000000000010;
-    4'b1010: dz = 'b00000000000001;
-    4'b1011: dz = 'b00000000000000;
-    4'b1100: dz = 'b00000000000000;
+    4'b0001: dz = 'b00000011111011;
+    4'b0010: dz = 'b00000001000000;
+    4'b0011: dz = 'b00000000010000;
+    4'b0100: dz = 'b00000000000100;
+    4'b0101: dz = 'b00000000000001;
+    4'b0110: dz = 'b00000000000000;
     default: dz = 'b00000000000000;
     endcase
 end
 
 always @(*) begin
-    case(last_iter_r)
-    4'b0001: begin x_prod = $signed('b1111111111) * x_r; y_prod = $signed('b1111111111) * y_r; end
-    4'b0010: begin x_prod = $signed('b1011010100) * x_r; y_prod = $signed('b1011010100) * y_r; end
-    4'b0011: begin x_prod = $signed('b1010001000) * x_r; y_prod = $signed('b1010001000) * y_r; end
-    4'b0100: begin x_prod = $signed('b1001110100) * x_r; y_prod = $signed('b1001110100) * y_r; end
-    4'b0101: begin x_prod = $signed('b1001101111) * x_r; y_prod = $signed('b1001101111) * y_r; end
-    4'b1111: begin x_prod = {x_r, {GAIN_WIDTH{1'b0}}}; y_prod = {y_r, {GAIN_WIDTH{1'b0}}}; end
-    default: begin x_prod = $signed('b1001101110) * x_r; y_prod = $signed('b1001101110) * y_r; end
+    case (iter)
+    4'b0000: dz2 = 'b00000111011011;
+    4'b0001: dz2 = 'b00000001111111;
+    4'b0010: dz2 = 'b00000000100000;
+    4'b0011: dz2 = 'b00000000001000;
+    4'b0100: dz2 = 'b00000000000010;
+    4'b0101: dz2 = 'b00000000000000;
+    default: dz2 = 'b00000000000000;
     endcase
 end
+
+always @(*) begin
+    case(last_iter_r)
+    4'b0001: begin x_prod = $signed('b1111111111) * x_mult; y_prod = $signed('b1111111111) * y_mult; end
+    4'b0010: begin x_prod = $signed('b1011010100) * x_mult; y_prod = $signed('b1011010100) * y_mult; end
+    4'b0011: begin x_prod = $signed('b1010001000) * x_mult; y_prod = $signed('b1010001000) * y_mult; end
+    4'b0100: begin x_prod = $signed('b1001110100) * x_mult; y_prod = $signed('b1001110100) * y_mult; end
+    4'b0101: begin x_prod = $signed('b1001101111) * x_mult; y_prod = $signed('b1001101111) * y_mult; end
+    4'b1111: begin x_prod = {x_mult, {GAIN_WIDTH{1'b0}}}; y_prod = {y_mult, {GAIN_WIDTH{1'b0}}}; end
+    default: begin x_prod = $signed('b1001101110) * x_mult; y_prod = $signed('b1001101110) * y_mult; end
+    endcase
+end
+
+assign x_mult = update1 ? (xy_inv_r ? -x_nxt : x_nxt) : (xy_inv_r ? -x_r : x_r);
+assign y_mult = update1 ? (xy_inv_r ? -y_nxt : y_nxt) : (xy_inv_r ? -y_r : y_r);
 
 assign dout_x = x_r;
 assign dout_y = y_r;
 assign dout_z = z_r;
 
 assign mode = (is_vec_mode && y_r > 0) || (!is_vec_mode && z_r < 0);
-assign update = (is_vec_mode && y_r != 0) || (!is_vec_mode && z_r != 0);
+assign update1 = (is_vec_mode && y_r != 0) || (!is_vec_mode && z_r != 0);
 assign x_nxt = mode ? (x_r + y_sft) : (x_r - y_sft);
 assign y_nxt = mode ? (y_r - x_sft) : (y_r + x_sft);
 assign z_nxt = mode ? (z_r + dz) : (z_r - dz);
+
+assign mode2 = (is_vec_mode && y_nxt > 0) || (!is_vec_mode && z_nxt < 0);
+assign update2 = (is_vec_mode && y_nxt != 0) || (!is_vec_mode && z_nxt != 0);
+assign x_nxt2 = mode2 ? (x_nxt + y_sft2) : (x_nxt - y_sft2);
+assign y_nxt2 = mode2 ? (y_nxt - x_sft2) : (y_nxt + x_sft2);
+assign z_nxt2 = mode2 ? (z_nxt + dz2) : (z_nxt - dz2);
+
+assign update = update1;
+assign x_update = update2 ? x_nxt2 : x_nxt;
+assign y_update = update2 ? y_nxt2 : y_nxt;
+assign z_update = update2 ? z_nxt2 : z_nxt;
+
 
 assign din_x_is_neg = din_x < 0;
 assign din_y_is_neg = din_y < 0;
@@ -590,23 +618,25 @@ assign din_z_fixed = (
                          din_z
 ));
 
-BarrelShifter #(.WIDTH(WIDTH)) shift1 (.din(x_r), .shift(iter), .dout(x_sft));
-BarrelShifter #(.WIDTH(WIDTH)) shift2 (.din(y_r), .shift(iter), .dout(y_sft));
+BarrelShifter #(.WIDTH(WIDTH)) shift1 (.din(x_r), .shift({iter[2:0], 1'b0}), .dout(x_sft));
+BarrelShifter #(.WIDTH(WIDTH)) shift2 (.din(y_r), .shift({iter[2:0], 1'b0}), .dout(y_sft));
+
+BarrelShifter #(.WIDTH(WIDTH)) shift3 (.din(x_nxt), .shift({iter[2:0], 1'b1}), .dout(x_sft2));
+BarrelShifter #(.WIDTH(WIDTH)) shift4 (.din(y_nxt), .shift({iter[2:0], 1'b1}), .dout(y_sft2));
 
 always @(*) begin
     x_w = load ? din_x_fixed : (
-        iter == 12 ? x_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] : // remove fractions
-        update ? x_nxt : (xy_inv_r ? -x_r : x_r)
+        iter == 6 ? x_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] : // remove fractions
+        update ? x_update : (xy_inv_r ? -x_r : x_r)
     );
     y_w = load ? din_y_fixed : (
-        iter == 12 ? y_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] :
-        update ? y_nxt : (xy_inv_r ? -y_r : y_r)
+        iter == 6 ? y_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] :
+        update ? y_update : (xy_inv_r ? -y_r : y_r)
     );
-    z_w = load ? din_z_fixed : (update ? z_nxt : z_r);
-    last_iter_w = load ? -1 : (update ? last_iter_r+1 : last_iter_r);
+    z_w = load ? din_z_fixed : (update ? z_update : z_r);
+    last_iter_w = load ? -1 : (update ? (update2 ? last_iter_r+2 : last_iter_r+1) : last_iter_r);
     xy_inv_w = load ? (din_z_neg_out || din_z_pos_out) :
-               update ? xy_inv_r :
-                    0; // Reset when the x y is negated
+               update && iter != 6 ? xy_inv_r : 0; // Reset when the x y is negated
 end
 
 always @(posedge clk) begin

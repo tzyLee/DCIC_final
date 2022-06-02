@@ -7,7 +7,7 @@ Report : power
         -analysis_effort low
 Design : QRD
 Version: R-2020.09-SP5
-Date   : Wed Jun  1 17:32:30 2022
+Date   : Thu Jun  2 11:54:55 2022
 ****************************************
 
 
@@ -29,12 +29,12 @@ Power-specific unit information :
     Leakage Power Units = 1pW
 
 
-  Cell Internal Power  =   2.4320 mW   (89%)
-  Net Switching Power  = 306.4866 uW   (11%)
+  Cell Internal Power  =   2.8155 mW   (85%)
+  Net Switching Power  = 501.0163 uW   (15%)
                          ---------
-Total Dynamic Power    =   2.7385 mW  (100%)
+Total Dynamic Power    =   3.3165 mW  (100%)
 
-Cell Leakage Power     = 165.3207 uW
+Cell Leakage Power     = 187.4837 uW
 
 
                  Internal         Switching           Leakage            Total
@@ -43,10 +43,10 @@ Power Group      Power            Power               Power              Power  
 io_pad             0.0000            0.0000            0.0000            0.0000  (   0.00%)
 memory             0.0000            0.0000            0.0000            0.0000  (   0.00%)
 black_box          0.0000            0.0000            0.0000            0.0000  (   0.00%)
-clock_network  4.9096e-03            0.0000        5.2546e+04        4.9621e-03  (   0.17%)
-register           1.7993        3.8314e-02        2.1810e+07            1.8594  (  64.03%)
+clock_network  5.3648e-03            0.0000        5.2546e+04        5.4173e-03  (   0.15%)
+register           1.9364        2.5078e-02        2.2005e+07            1.9835  (  56.61%)
 sequential         0.0000            0.0000            0.0000            0.0000  (   0.00%)
-combinational      0.6278            0.2682        1.4346e+08            1.0394  (  35.80%)
+combinational      0.8737            0.4759        1.6543e+08            1.5151  (  43.24%)
 --------------------------------------------------------------------------------------------------
-Total              2.4320 mW         0.3065 mW     1.6532e+08 pW         2.9038 mW
+Total              2.8155 mW         0.5010 mW     1.8748e+08 pW         3.5040 mW
 1
