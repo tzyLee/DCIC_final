@@ -7,7 +7,7 @@ Report : power
         -analysis_effort low
 Design : QRD
 Version: R-2020.09-SP5
-Date   : Thu Jun  2 15:41:10 2022
+Date   : Thu Jun  2 15:52:29 2022
 ****************************************
 
 
@@ -29,12 +29,12 @@ Power-specific unit information :
     Leakage Power Units = 1pW
 
 
-  Cell Internal Power  =   4.9492 mW   (91%)
-  Net Switching Power  = 498.0294 uW    (9%)
+  Cell Internal Power  =  10.9475 mW   (91%)
+  Net Switching Power  =   1.0432 mW    (9%)
                          ---------
-Total Dynamic Power    =   5.4472 mW  (100%)
+Total Dynamic Power    =  11.9907 mW  (100%)
 
-Cell Leakage Power     =  92.9535 uW
+Cell Leakage Power     = 114.3887 uW
 
 
                  Internal         Switching           Leakage            Total
@@ -44,9 +44,9 @@ io_pad             0.0000            0.0000            0.0000            0.0000 
 memory             0.0000            0.0000            0.0000            0.0000  (   0.00%)
 black_box          0.0000            0.0000            0.0000            0.0000  (   0.00%)
 clock_network      0.0000            0.0000            0.0000            0.0000  (   0.00%)
-register           4.0640        5.0242e-02        2.1315e+07            4.1355  (  74.65%)
+register           9.3301            0.1009        2.9993e+07            9.4610  (  78.16%)
 sequential         0.0000            0.0000            0.0000            0.0000  (   0.00%)
-combinational      0.8852            0.4478        7.1639e+07            1.4046  (  25.35%)
+combinational      1.6175            0.9423        8.4396e+07            2.6442  (  21.84%)
 --------------------------------------------------------------------------------------------------
-Total              4.9492 mW         0.4980 mW     9.2954e+07 pW         5.5401 mW
+Total             10.9476 mW         1.0432 mW     1.1439e+08 pW        12.1051 mW
 1
