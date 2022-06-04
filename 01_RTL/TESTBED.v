@@ -16,7 +16,7 @@ parameter IN_width		= 14;
 // parameter latency_limit	= 68;
 parameter TIMEOUT       = 1000;
 
-parameter CYCLE			= 2.8;
+parameter CYCLE			= 4.1;
 parameter ERR_THRESHOLD = 6;
 
 reg signed [IN_width-1:0] din_r, din_i;

@@ -15,8 +15,7 @@ module QRD(
 parameter WIDTH = 14;
 parameter ITER = 32;
 parameter HALF_ITER = 16;
-parameter ITER_SWITCH = 13; // 13 -> 16 (13th iteration for CORDIC mult)
-parameter ITER_MAX = ITER-1;
+parameter ITER_SWITCH = 7; // 14 -> 16 (13th iteration for CORDIC mult)
 parameter ITER_LAST = HALF_ITER+ITER_SWITCH;
 
 localparam STATE_IDLE = 0;
@@ -47,18 +46,6 @@ reg signed [WIDTH-1:0] in_row_1_r_w, in_row_1_i_w,
                        in_row_2_r_w, in_row_2_i_w,
                        in_row_3_r_w, in_row_3_i_w,
                        in_row_4_r_w, in_row_4_i_w;
-
-// Systolic array buffer (for pipelining)
-reg signed [2*WIDTH:0] row_buf_1_1_r, row_buf_1_1_w; // {flag, real, imag}
-reg signed [2*WIDTH:0] row_buf_1_2_r, row_buf_1_2_w;
-reg signed [2*WIDTH:0] row_buf_1_3_r, row_buf_1_3_w;
-reg signed [2*WIDTH:0] row_buf_2_1_r, row_buf_2_1_w;
-reg signed [2*WIDTH:0] row_buf_2_2_r, row_buf_2_2_w;
-reg signed [2*WIDTH:0] row_buf_3_1_r, row_buf_3_1_w;
-
-reg signed [2*WIDTH:0] col_buf_1_2_r, col_buf_1_2_w;
-reg signed [2*WIDTH:0] col_buf_1_3_r, col_buf_1_3_w;
-reg signed [2*WIDTH:0] col_buf_2_2_r, col_buf_2_2_w;
 
 // Row-wise wire
 wire signed [WIDTH-1:0] row_in_1_r_1, row_out_1_r_1, row_in_1_i_1, row_out_1_i_1;
@@ -91,6 +78,9 @@ wire col_in_2_f_1, col_out_2_f_1, col_in_2_f_2, col_out_2_f_2;
 wire col_in_1_f_1, col_out_1_f_1;
 // Pipeline control
 wire PE_switch, PE_load, DU_load, CORDIC_load;
+
+// Clock gating
+wire pipeline_clk, input_clk;
 
 // Registers
 reg [3:0] state_r, state_w;
@@ -174,6 +164,10 @@ DU #(.WIDTH(WIDTH)) du_row_4(
     .dout_r(row_out_4_r_4), .dout_i(row_out_4_i_4), .dout_f()
 );
 
+/* Clock gating */
+assign pipeline_clk = clk & ((counter_r == ITER_LAST) || (counter_r == ITER_LAST-1));
+assign input_clk = clk & (state_r == STATE_WAIT || (counter_r == ITER_LAST) || (counter_r == ITER_LAST-1));
+
 /* Continuous assignment */
 assign PE_switch = counter_r[4];
 assign PE_load = counter_r == ITER_LAST;
@@ -202,7 +196,7 @@ always @(*) begin
 end
 always @(posedge clk) begin
     if (!rst_n) begin
-        counter_r <= -5;
+        counter_r <= -11;
     end
     else begin
         counter_r <= counter_w;
@@ -272,7 +266,7 @@ always @(*) begin
     in_row_4_i_w = row_in_4_i;
 end
 
-always @(posedge clk) begin
+always @(posedge input_clk) begin
     in_row_1_f_r <= in_row_1_f_w;
     in_row_2_f_r <= in_row_2_f_w;
     in_row_3_f_r <= in_row_3_f_w;
@@ -396,9 +390,9 @@ CORDIC #(.WIDTH(WIDTH)) cordic_2(
 
 always @(*) begin
     // angle can be retrieved 1 cycle before mult is finished
-    ang_a_w = is_vec_mode && !switch && iter == 13 ? -cordic_1_z_out : ang_a_r;
-    ang_b_w = is_vec_mode && !switch && iter == 13 ? -cordic_2_z_out : ang_b_r;
-    ang_1_w = is_vec_mode && switch && iter == 13 ? -cordic_1_z_out : ang_1_r;
+    ang_a_w = is_vec_mode && !switch && iter == 7 ? -cordic_1_z_out : ang_a_r;
+    ang_b_w = is_vec_mode && !switch && iter == 7 ? -cordic_2_z_out : ang_b_r;
+    ang_1_w = is_vec_mode && switch && iter == 7 ? -cordic_1_z_out : ang_1_r;
 end
 
 always @(*) begin
@@ -483,12 +477,18 @@ output signed [WIDTH-1:0] dout_x, dout_y, dout_z;
 
 reg signed [WIDTH-1:0] x_r, x_w;
 reg signed [WIDTH-1:0] y_r, y_w;
-reg signed [WIDTH-1:0] z_r, z_w, dz;
+reg signed [WIDTH-1:0] z_r, z_w, dz, dz2;
 reg should_mult_r, should_mult_w;
 reg xy_inv_r, xy_inv_w;
 
 wire signed [WIDTH-1:0] x_sft, y_sft;
 wire signed [WIDTH-1:0] x_nxt, y_nxt, z_nxt;
+
+wire signed [WIDTH-1:0] x_sft2, y_sft2;
+wire signed [WIDTH-1:0] x_nxt2, y_nxt2, z_nxt2;
+
+wire signed [WIDTH-1:0] x_mult, y_mult;
+wire signed [WIDTH-1:0] x_update, y_update, z_update;
 
 reg signed [WIDTH+GAIN_WIDTH-1:0] x_prod, y_prod;
 wire din_x_is_neg, din_y_is_neg;
@@ -496,47 +496,69 @@ wire din_z_neg_out, din_z_pos_out;
 wire signed [WIDTH-1:0] din_x_fixed;
 wire signed [WIDTH-1:0] din_y_fixed;
 wire signed [WIDTH-1:0] din_z_fixed;
-wire mode, update;
+wire mode, mode2;
+wire update, update1, update2;
+wire [3:0] iter2;
 
 always @(*) begin
     case (iter)
     4'b0000: dz = 'b00001100100100;
-    4'b0001: dz = 'b00000111011011;
-    4'b0010: dz = 'b00000011111011;
-    4'b0011: dz = 'b00000001111111;
-    4'b0100: dz = 'b00000001000000;
-    4'b0101: dz = 'b00000000100000;
-    4'b0110: dz = 'b00000000010000;
-    4'b0111: dz = 'b00000000001000;
-    4'b1000: dz = 'b00000000000100;
-    4'b1001: dz = 'b00000000000010;
-    4'b1010: dz = 'b00000000000001;
-    4'b1011: dz = 'b00000000000000;
-    4'b1100: dz = 'b00000000000000;
+    4'b0001: dz = 'b00000011111011;
+    4'b0010: dz = 'b00000001000000;
+    4'b0011: dz = 'b00000000010000;
+    4'b0100: dz = 'b00000000000100;
+    4'b0101: dz = 'b00000000000001;
+    4'b0110: dz = 'b00000000000000;
     default: dz = 'b00000000000000;
     endcase
 end
 
 always @(*) begin
+    case (iter)
+    4'b0000: dz2 = 'b00000111011011;
+    4'b0001: dz2 = 'b00000001111111;
+    4'b0010: dz2 = 'b00000000100000;
+    4'b0011: dz2 = 'b00000000001000;
+    4'b0100: dz2 = 'b00000000000010;
+    4'b0101: dz2 = 'b00000000000000;
+    default: dz2 = 'b00000000000000;
+    endcase
+end
+
+always @(*) begin
     if (should_mult_r) begin
-        x_prod = $signed('b1001101110) * x_r;
-        y_prod = $signed('b1001101110) * y_r;
+        x_prod = $signed('b1001101110) * x_mult;
+        y_prod = $signed('b1001101110) * y_mult;
     end
     else begin
-        x_prod = {x_r, {GAIN_WIDTH{1'b0}}};
-        y_prod = {y_r, {GAIN_WIDTH{1'b0}}};
+        x_prod = {x_mult, {GAIN_WIDTH{1'b0}}};
+        y_prod = {y_mult, {GAIN_WIDTH{1'b0}}};
     end
 end
+
+assign x_mult = update1 ? (xy_inv_r ? -x_nxt : x_nxt) : (xy_inv_r ? -x_r : x_r);
+assign y_mult = update1 ? (xy_inv_r ? -y_nxt : y_nxt) : (xy_inv_r ? -y_r : y_r);
 
 assign dout_x = x_r;
 assign dout_y = y_r;
 assign dout_z = z_r;
 
 assign mode = (is_vec_mode && y_r > 0) || (!is_vec_mode && z_r < 0);
-assign update = (is_vec_mode && y_r != 0) || (!is_vec_mode && z_r != 0);
+assign update1 = (is_vec_mode && y_r != 0) || (!is_vec_mode && z_r != 0);
 assign x_nxt = mode ? (x_r + y_sft) : (x_r - y_sft);
 assign y_nxt = mode ? (y_r - x_sft) : (y_r + x_sft);
 assign z_nxt = mode ? (z_r + dz) : (z_r - dz);
+
+assign mode2 = (is_vec_mode && y_nxt > 0) || (!is_vec_mode && z_nxt < 0);
+assign update2 = (is_vec_mode && y_nxt != 0) || (!is_vec_mode && z_nxt != 0);
+assign x_nxt2 = mode2 ? (x_nxt + y_sft2) : (x_nxt - y_sft2);
+assign y_nxt2 = mode2 ? (y_nxt - x_sft2) : (y_nxt + x_sft2);
+assign z_nxt2 = mode2 ? (z_nxt + dz2) : (z_nxt - dz2);
+
+assign update = update1;
+assign x_update = update2 ? x_nxt2 : x_nxt;
+assign y_update = update2 ? y_nxt2 : y_nxt;
+assign z_update = update2 ? z_nxt2 : z_nxt;
 
 assign din_x_is_neg = din_x < 0;
 assign din_y_is_neg = din_y < 0;
@@ -557,32 +579,33 @@ assign din_z_fixed = (
                          din_z
 ));
 
-BarrelShifter #(.WIDTH(WIDTH)) shift1 (.din(x_r), .shift(iter), .dout(x_sft));
-BarrelShifter #(.WIDTH(WIDTH)) shift2 (.din(y_r), .shift(iter), .dout(y_sft));
+BarrelShifter #(.WIDTH(WIDTH)) shift1 (.din(x_r), .shift({iter[2:0], 1'b0}), .dout(x_sft));
+BarrelShifter #(.WIDTH(WIDTH)) shift2 (.din(y_r), .shift({iter[2:0], 1'b0}), .dout(y_sft));
+
+BarrelShifter #(.WIDTH(WIDTH)) shift3 (.din(x_nxt), .shift({iter[2:0], 1'b1}), .dout(x_sft2));
+BarrelShifter #(.WIDTH(WIDTH)) shift4 (.din(y_nxt), .shift({iter[2:0], 1'b1}), .dout(y_sft2));
 
 always @(*) begin
     x_w = load ? din_x_fixed : (
-        iter == 12 ? x_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] : // remove fractions
-        update ? x_nxt : (xy_inv_r ? -x_r : x_r)
+        iter == 6 ? x_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] : // remove fractions
+        update ? x_update : (xy_inv_r ? -x_r : x_r)
     );
 end
-
 always @(*) begin
     y_w = load ? din_y_fixed : (
-        iter == 12 ? y_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] :
-        update ? y_nxt : (xy_inv_r ? -y_r : y_r)
+        iter == 6 ? y_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] :
+        update ? y_update : (xy_inv_r ? -y_r : y_r)
     );
 end
 always @(*) begin
-    z_w = load ? din_z_fixed : (update ? z_nxt : z_r);
+    z_w = load ? din_z_fixed : (update ? z_update : z_r);
 end
 always @(*) begin
     should_mult_w = load ? 0 : (update || should_mult_r);
 end
 always @(*) begin
     xy_inv_w = load ? (din_z_neg_out || din_z_pos_out) :
-               update ? xy_inv_r :
-                    0; // Reset when the x y is negated
+               update && iter != 6 ? xy_inv_r : 0; // Reset when the x y is negated
 end
 
 always @(posedge clk) begin
