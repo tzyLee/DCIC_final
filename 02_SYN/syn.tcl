@@ -15,7 +15,7 @@ set compile_fix_multiple_port_nets "TRUE"
 
 set DESIGN "QRD"
 set CLOCK "clk"
-set CLOCK_PERIOD 3.0
+set CLOCK_PERIOD 2.8
 read_file -format verilog ../01_RTL/$DESIGN\.v
 
 current_design $DESIGN
