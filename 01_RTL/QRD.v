@@ -15,7 +15,7 @@ module QRD(
 parameter WIDTH = 14;
 parameter ITER = 32;
 parameter HALF_ITER = 16;
-parameter ITER_SWITCH = 8; // 14 -> 16 (13th iteration for CORDIC mult)
+parameter ITER_SWITCH = 5; // 14 -> 16 (13th iteration for CORDIC mult)
 parameter ITER_LAST = HALF_ITER+ITER_SWITCH;
 
 localparam STATE_IDLE = 0;
@@ -196,7 +196,7 @@ always @(*) begin
 end
 always @(posedge clk) begin
     if (!rst_n) begin
-        counter_r <= -10;
+        counter_r <= -13;
     end
     else begin
         counter_r <= counter_w;
@@ -390,9 +390,9 @@ CORDIC #(.WIDTH(WIDTH)) cordic_2(
 
 always @(*) begin
     // angle can be retrieved 1 cycle before mult is finished
-    ang_a_w = is_vec_mode && !switch && iter == 7 ? -cordic_1_z_out : ang_a_r;
-    ang_b_w = is_vec_mode && !switch && iter == 7 ? -cordic_2_z_out : ang_b_r;
-    ang_1_w = is_vec_mode && switch && iter == 7 ? -cordic_1_z_out : ang_1_r;
+    ang_a_w = is_vec_mode && !switch && iter == 4 ? -cordic_1_z_out : ang_a_r;
+    ang_b_w = is_vec_mode && !switch && iter == 4 ? -cordic_2_z_out : ang_b_r;
+    ang_1_w = is_vec_mode && switch && iter == 4 ? -cordic_1_z_out : ang_1_r;
 end
 
 always @(*) begin
@@ -587,13 +587,13 @@ BarrelShifter #(.WIDTH(WIDTH)) shift4 (.din(y_nxt), .shift({iter[2:0], 1'b1}), .
 
 always @(*) begin
     x_w = load ? din_x_fixed : (
-        iter == 7 ? x_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] : // remove fractions
+        iter == 4 ? x_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] : // remove fractions
         update ? x_update : (xy_inv_r ? -x_r : x_r)
     );
 end
 always @(*) begin
     y_w = load ? din_y_fixed : (
-        iter == 7 ? y_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] :
+        iter == 4 ? y_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] :
         update ? y_update : (xy_inv_r ? -y_r : y_r)
     );
 end

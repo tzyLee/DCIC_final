@@ -7,7 +7,7 @@ Report : power
         -analysis_effort low
 Design : QRD
 Version: R-2020.09-SP5
-Date   : Sat Jun  4 22:22:21 2022
+Date   : Sat Jun  4 23:07:45 2022
 ****************************************
 
 
@@ -29,12 +29,12 @@ Power-specific unit information :
     Leakage Power Units = 1pW
 
 
-  Cell Internal Power  =   8.4451 mW   (81%)
-  Net Switching Power  =   2.0178 mW   (19%)
+  Cell Internal Power  =  11.0263 mW   (78%)
+  Net Switching Power  =   3.1808 mW   (22%)
                          ---------
-Total Dynamic Power    =  10.4629 mW  (100%)
+Total Dynamic Power    =  14.2071 mW  (100%)
 
-Cell Leakage Power     = 165.5803 uW
+Cell Leakage Power     = 173.9903 uW
 
 
                  Internal         Switching           Leakage            Total
@@ -43,10 +43,10 @@ Power Group      Power            Power               Power              Power  
 io_pad             0.0000            0.0000            0.0000            0.0000  (   0.00%)
 memory             0.0000            0.0000            0.0000            0.0000  (   0.00%)
 black_box          0.0000            0.0000            0.0000            0.0000  (   0.00%)
-clock_network  6.2167e-03            0.0000        2.6273e+04        6.2429e-03  (   0.06%)
-register           5.5227        5.5810e-02        2.5910e+07            5.6045  (  52.73%)
+clock_network  7.3205e-03            0.0000        2.6273e+04        7.3468e-03  (   0.05%)
+register           6.3937            0.1072        2.6706e+07            6.5276  (  45.39%)
 sequential         0.0000            0.0000            0.0000            0.0000  (   0.00%)
-combinational      2.9161            1.9620        1.3964e+08            5.0177  (  47.21%)
+combinational      4.6253            3.0735        1.4726e+08            7.8460  (  54.56%)
 --------------------------------------------------------------------------------------------------
-Total              8.4450 mW         2.0178 mW     1.6558e+08 pW        10.6285 mW
+Total             11.0263 mW         3.1807 mW     1.7399e+08 pW        14.3810 mW
 1
