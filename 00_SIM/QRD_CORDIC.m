@@ -22,7 +22,7 @@ for col = 1:s(2)-1
 
             [s_cr, s_ci, ~] = CORDIC_Q_factor_scale(real(c), imag(c), -ang_a, 'rotation', iter);
             [s_dr, s_di, ~] = CORDIC_Q_factor_scale(real(d), imag(d), -ang_b, 'rotation', iter);
-    
+
             [x_r, y_r, ~] = CORDIC_Q_factor_scale(s_cr, s_dr, -ang_1, 'rotation', iter);
             [x_i, y_i, ~] = CORDIC_Q_factor_scale(s_ci, s_di, -ang_1, 'rotation', iter);
 
@@ -36,7 +36,7 @@ for col = 1:s(2)-1
 
             [s_cr, s_ci, ~] = CORDIC_Q_factor_scale(real(c), imag(c), -ang_a, 'rotation', iter);
             [s_dr, s_di, ~] = CORDIC_Q_factor_scale(real(d), imag(d), -ang_b, 'rotation', iter);
-    
+
             [x_r, y_r, ~] = CORDIC_Q_factor_scale(s_cr, s_dr, -ang_1, 'rotation', iter);
             [x_i, y_i, ~] = CORDIC_Q_factor_scale(s_ci, s_di, -ang_1, 'rotation', iter);
 

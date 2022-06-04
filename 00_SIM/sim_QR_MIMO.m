@@ -35,7 +35,7 @@ semilogy(EbN0, BER(9, :), '-p', 'LineWidth', 2, 'MarkerSize', 10);
 semilogy(EbN0, BER(10, :), '-h', 'LineWidth', 2, 'MarkerSize', 10);
 xlabel("Eb/N0 (dB)");
 ylabel("BER");
-title(sprintf("%dx%d 16-QAM Detection", N_T, N_R));
+title(sprintf("%dx%d 64-QAM Detection under different number of CORDIC iteration", N_T, N_R));
 legend(decoders, 'Location', 'southwest');
 xlim([min(EbN0), max(EbN0)]);
 ylim([1e-3, 1]);

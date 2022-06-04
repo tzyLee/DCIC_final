@@ -6,7 +6,7 @@ Report : timing
         -max_paths 1
 Design : QRD
 Version: R-2020.09-SP5
-Date   : Sat Jun  4 23:07:46 2022
+Date   : Sun Jun  5 00:34:38 2022
 ****************************************
 
 Operating Conditions: slow   Library: slow
@@ -14,7 +14,7 @@ Wire Load Model Mode: top
 
   Startpoint: counter_r_reg[0]
               (rising edge-triggered flip-flop clocked by clk)
-  Endpoint: pe_row_1_3/cordic_1/x_r_reg[13]
+  Endpoint: pe_row_3_3/cordic_1/x_r_reg[10]
             (rising edge-triggered flip-flop clocked by clk)
   Path Group: clk
   Path Type: max
@@ -24,47 +24,38 @@ Wire Load Model Mode: top
   clock clk (rise edge)                                   0.00       0.00
   clock network delay (ideal)                             0.00       0.00
   counter_r_reg[0]/CK (DFFHQX8)                           0.00       0.00 r
-  counter_r_reg[0]/Q (DFFHQX8)                            0.27       0.27 f
-  U10683/Y (NOR2X4)                                       0.11       0.38 r
-  U11970/Y (NAND2X6)                                      0.09       0.46 f
-  U13682/Y (INVX16)                                       0.10       0.56 r
-  U20879/Y (BUFX12)                                       0.15       0.71 r
-  U15862/Y (NAND2XL)                                      0.06       0.77 f
-  U8814/Y (NAND3XL)                                       0.14       0.91 r
-  U10582/Y (NOR2BX1)                                      0.08       0.99 f
-  U10561/Y (XOR2X1)                                       0.15       1.14 f
-  U11174/Y (NOR2X1)                                       0.14       1.27 r
-  U21953/Y (OAI21X1)                                      0.08       1.35 f
-  U21952/Y (INVXL)                                        0.12       1.47 r
-  U23345/Y (OAI21X2)                                      0.09       1.56 f
-  U8877/Y (NAND2BX1)                                      0.08       1.65 r
-  U11697/Y (CLKAND2X3)                                    0.16       1.81 r
-  U11636/Y (NAND2X4)                                      0.09       1.90 f
-  U15126/Y (AOI21X4)                                      0.11       2.01 r
-  U21053/Y (XOR2X4)                                       0.15       2.15 r
-  U21255/Y (NAND2X1)                                      0.11       2.27 f
-  U17966/Y (AND2X2)                                       0.18       2.45 f
-  U25454/Y (NAND3X1)                                      0.11       2.57 r
-  U10831/Y (CLKINVX1)                                     0.09       2.66 f
-  U19518/Y (NOR2X1)                                       0.14       2.80 r
-  U25275/Y (NOR2X1)                                       0.09       2.89 f
-  U25279/Y (AOI21X1)                                      0.15       3.03 r
-  U25280/Y (OAI21X2)                                      0.12       3.16 f
-  U9704/Y (AOI21XL)                                       0.16       3.32 r
-  U31121/Y (XOR2XL)                                       0.16       3.48 f
-  U13786/Y (OAI2BB1X1)                                    0.17       3.65 f
-  pe_row_1_3/cordic_1/x_r_reg[13]/D (DFFHQX4)             0.00       3.65 f
-  data arrival time                                                  3.65
+  counter_r_reg[0]/Q (DFFHQX8)                            0.26       0.26 f
+  U11093/Y (NOR2X8)                                       0.17       0.43 r
+  U12036/Y (BUFX4)                                        0.15       0.57 r
+  U10758/Y (INVX4)                                        0.07       0.64 f
+  U11985/Y (NOR2XL)                                       0.13       0.77 r
+  U11983/Y (NOR2X1)                                       0.07       0.84 f
+  U8327/Y (NAND2BX1)                                      0.09       0.94 r
+  U7975/Y (INVXL)                                         0.06       1.00 f
+  U22788/Y (OAI211X1)                                     0.22       1.22 r
+  U8662/Y (INVXL)                                         0.05       1.28 f
+  U21889/Y (OAI2BB2XL)                                    0.24       1.51 f
+  U20317/Y (INVXL)                                        0.11       1.63 r
+  U20338/Y (NOR2X1)                                       0.07       1.70 f
+  U20316/Y (NOR2X2)                                       0.12       1.82 r
+  U10908/Y (OAI21X4)                                      0.09       1.91 f
+  U7469/Y (AOI21XL)                                       0.18       2.09 r
+  U8034/Y (XNOR2X1)                                       0.15       2.23 r
+  U8482/Y (NOR2X1)                                        0.07       2.31 f
+  U6181/Y (NOR3X1)                                        0.19       2.49 r
+  U11454/Y (OAI2BB1X2)                                    0.07       2.56 f
+  pe_row_3_3/cordic_1/x_r_reg[10]/D (DFFHQX8)             0.00       2.56 f
+  data arrival time                                                  2.56
 
-  clock clk (rise edge)                                   3.90       3.90
-  clock network delay (ideal)                             0.00       3.90
-  clock uncertainty                                      -0.10       3.80
-  pe_row_1_3/cordic_1/x_r_reg[13]/CK (DFFHQX4)            0.00       3.80 r
-  library setup time                                     -0.15       3.65
-  data required time                                                 3.65
+  clock clk (rise edge)                                   2.80       2.80
+  clock network delay (ideal)                             0.00       2.80
+  clock uncertainty                                      -0.10       2.70
+  pe_row_3_3/cordic_1/x_r_reg[10]/CK (DFFHQX8)            0.00       2.70 r
+  library setup time                                     -0.14       2.56
+  data required time                                                 2.56
   --------------------------------------------------------------------------
-  data required time                                                 3.65
-  data arrival time                                                 -3.65
+  data required time                                                 2.56
+  data arrival time                                                 -2.56
   --------------------------------------------------------------------------
   slack (MET)                                                        0.00
 

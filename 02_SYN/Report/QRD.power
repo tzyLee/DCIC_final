@@ -7,7 +7,7 @@ Report : power
         -analysis_effort low
 Design : QRD
 Version: R-2020.09-SP5
-Date   : Sat Jun  4 23:07:45 2022
+Date   : Sun Jun  5 00:34:38 2022
 ****************************************
 
 
@@ -29,12 +29,12 @@ Power-specific unit information :
     Leakage Power Units = 1pW
 
 
-  Cell Internal Power  =  11.0263 mW   (78%)
-  Net Switching Power  =   3.1808 mW   (22%)
+  Cell Internal Power  =  13.5219 mW   (85%)
+  Net Switching Power  =   2.4525 mW   (15%)
                          ---------
-Total Dynamic Power    =  14.2071 mW  (100%)
+Total Dynamic Power    =  15.9743 mW  (100%)
 
-Cell Leakage Power     = 173.9903 uW
+Cell Leakage Power     = 157.0587 uW
 
 
                  Internal         Switching           Leakage            Total
@@ -43,10 +43,10 @@ Power Group      Power            Power               Power              Power  
 io_pad             0.0000            0.0000            0.0000            0.0000  (   0.00%)
 memory             0.0000            0.0000            0.0000            0.0000  (   0.00%)
 black_box          0.0000            0.0000            0.0000            0.0000  (   0.00%)
-clock_network  7.3205e-03            0.0000        2.6273e+04        7.3468e-03  (   0.05%)
-register           6.3937            0.1072        2.6706e+07            6.5276  (  45.39%)
+clock_network  8.7370e-03            0.0000        2.6273e+04        8.7633e-03  (   0.05%)
+register          10.0739            0.1612        3.2289e+07           10.2674  (  63.65%)
 sequential         0.0000            0.0000            0.0000            0.0000  (   0.00%)
-combinational      4.6253            3.0735        1.4726e+08            7.8460  (  54.56%)
+combinational      3.4392            2.2913        1.2474e+08            5.8552  (  36.30%)
 --------------------------------------------------------------------------------------------------
-Total             11.0263 mW         3.1807 mW     1.7399e+08 pW        14.3810 mW
+Total             13.5218 mW         2.4524 mW     1.5706e+08 pW        16.1314 mW
 1
