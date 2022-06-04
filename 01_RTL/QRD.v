@@ -15,7 +15,7 @@ module QRD(
 parameter WIDTH = 14;
 parameter ITER = 32;
 parameter HALF_ITER = 16;
-parameter ITER_SWITCH = 7; // 14 -> 16 (13th iteration for CORDIC mult)
+parameter ITER_SWITCH = 8; // 14 -> 16 (13th iteration for CORDIC mult)
 parameter ITER_LAST = HALF_ITER+ITER_SWITCH;
 
 localparam STATE_IDLE = 0;
@@ -196,7 +196,7 @@ always @(*) begin
 end
 always @(posedge clk) begin
     if (!rst_n) begin
-        counter_r <= -11;
+        counter_r <= -10;
     end
     else begin
         counter_r <= counter_w;
@@ -536,8 +536,8 @@ always @(*) begin
     end
 end
 
-assign x_mult = update1 ? (xy_inv_r ? -x_nxt : x_nxt) : (xy_inv_r ? -x_r : x_r);
-assign y_mult = update1 ? (xy_inv_r ? -y_nxt : y_nxt) : (xy_inv_r ? -y_r : y_r);
+assign x_mult = (xy_inv_r ? -x_r : x_r);
+assign y_mult = (xy_inv_r ? -y_r : y_r);
 
 assign dout_x = x_r;
 assign dout_y = y_r;
@@ -587,13 +587,13 @@ BarrelShifter #(.WIDTH(WIDTH)) shift4 (.din(y_nxt), .shift({iter[2:0], 1'b1}), .
 
 always @(*) begin
     x_w = load ? din_x_fixed : (
-        iter == 6 ? x_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] : // remove fractions
+        iter == 7 ? x_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] : // remove fractions
         update ? x_update : (xy_inv_r ? -x_r : x_r)
     );
 end
 always @(*) begin
     y_w = load ? din_y_fixed : (
-        iter == 6 ? y_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] :
+        iter == 7 ? y_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] :
         update ? y_update : (xy_inv_r ? -y_r : y_r)
     );
 end
