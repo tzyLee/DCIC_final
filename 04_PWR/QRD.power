@@ -8,14 +8,14 @@ Information: The waveform options are:
 
 Information: Power analysis is running, please wait ...
 
-Information: analysis is done for time window (0ns - 1036ns)
+Information: analysis is done for time window (0ns - 984ns)
 
-Information: Total simulation time = 1036.000000 ns
+Information: Total simulation time = 984.000000 ns
 ****************************************
 Report : Time Based Power
 Design : QRD
 Version: T-2022.03
-Date   : Sat Jun  4 14:59:08 2022
+Date   : Sat Jun  4 22:29:33 2022
 ****************************************
 
 
@@ -30,24 +30,24 @@ Power Group             Power     Power      Power      Power   (     %)  Attrs
 --------------------------------------------------------------------------------
 clock_network              0.0000    0.0000    0.0000    0.0000 ( 0.00%)  
 register                   0.0000    0.0000    0.0000    0.0000 ( 0.00%)  i
-combinational           4.662e-03 3.176e-03 1.013e-04 7.939e-03 (45.27%)  
-sequential              9.230e-03 3.427e-04 2.548e-05 9.598e-03 (54.73%)  
+combinational           8.127e-03 6.125e-03 1.396e-04    0.0144 (67.67%)  
+sequential              6.703e-03 1.474e-04 2.594e-05 6.876e-03 (32.33%)  
 memory                     0.0000    0.0000    0.0000    0.0000 ( 0.00%)  
 io_pad                     0.0000    0.0000    0.0000    0.0000 ( 0.00%)  
 black_box                  0.0000    0.0000    0.0000    0.0000 ( 0.00%)  
 
-  Net Switching Power  = 3.519e-03   (20.06%)
-  Cell Internal Power  =    0.0139   (79.21%)
-  Cell Leakage Power   = 1.268e-04   ( 0.72%)
-    Intrinsic Leakage  = 1.268e-04
+  Net Switching Power  = 6.272e-03   (29.49%)
+  Cell Internal Power  =    0.0148   (69.73%)
+  Cell Leakage Power   = 1.656e-04   ( 0.78%)
+    Intrinsic Leakage  = 1.656e-04
     Gate Leakage       =    0.0000
                          ---------
-Total Power            =    0.0175  (100.00%)
+Total Power            =    0.0213  (100.00%)
 
-X Transition Power     = 1.765e-04
+X Transition Power     = 2.871e-04
 Glitching Power        =    0.0000
 
-Peak Power             =    0.0603
-Peak Time              =    332.00
+Peak Power             =    0.0920
+Peak Time              =    470.00
 
 1

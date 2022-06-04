@@ -6,15 +6,15 @@ Report : timing
         -max_paths 1
 Design : QRD
 Version: R-2020.09-SP5
-Date   : Sat Jun  4 20:30:38 2022
+Date   : Sat Jun  4 22:22:22 2022
 ****************************************
 
 Operating Conditions: slow   Library: slow
 Wire Load Model Mode: top
 
-  Startpoint: counter_r_reg[0]
+  Startpoint: pe_row_1_2/cordic_1/y_r_reg[1]
               (rising edge-triggered flip-flop clocked by clk)
-  Endpoint: pe_row_1_3/cordic_1/x_r_reg[5]
+  Endpoint: pe_row_1_2/cordic_1/y_r_reg[11]
             (rising edge-triggered flip-flop clocked by clk)
   Path Group: clk
   Path Type: max
@@ -23,44 +23,40 @@ Wire Load Model Mode: top
   --------------------------------------------------------------------------
   clock clk (rise edge)                                   0.00       0.00
   clock network delay (ideal)                             0.00       0.00
-  counter_r_reg[0]/CK (DFFHQX8)                           0.00       0.00 r
-  counter_r_reg[0]/Q (DFFHQX8)                            0.29       0.29 f
-  U12257/Y (NAND3X4)                                      0.13       0.42 r
-  U11111/Y (INVX6)                                        0.09       0.51 f
-  U21509/Y (INVX20)                                       0.12       0.63 r
-  U19096/Y (INVX20)                                       0.09       0.72 f
-  U24286/Y (AOI21XL)                                      0.17       0.89 r
-  U22244/Y (NAND3X1)                                      0.11       1.00 f
-  U10037/Y (XOR2X1)                                       0.16       1.16 f
-  U9815/Y (NOR2X1)                                        0.17       1.33 r
-  U11329/Y (NOR2X2)                                       0.13       1.46 f
-  U23088/Y (AOI21X4)                                      0.15       1.61 r
-  U18323/Y (NAND2X6)                                      0.08       1.69 f
-  U19053/Y (AOI21X2)                                      0.13       1.82 r
-  U27118/Y (XOR2X4)                                       0.15       1.98 f
-  U9030/Y (AO21X1)                                        0.32       2.30 f
-  U23438/Y (AOI21X4)                                      0.13       2.43 r
-  U20615/S (ADDFX2)                                       0.45       2.87 f
-  U23582/Y (NAND2BX2)                                     0.18       3.05 f
-  U21601/Y (NAND2X2)                                      0.10       3.15 r
-  U20082/Y (OAI21X4)                                      0.08       3.23 f
-  U20081/Y (AOI21X4)                                      0.13       3.35 r
-  U9356/Y (OAI21XL)                                       0.10       3.45 f
-  U9347/Y (INVXL)                                         0.08       3.53 r
-  U35292/Y (XOR2XL)                                       0.13       3.66 f
-  U7476/Y (OAI2BB1X1)                                     0.16       3.82 f
-  pe_row_1_3/cordic_1/x_r_reg[5]/D (DFFHQX2)              0.00       3.82 f
-  data arrival time                                                  3.82
+  pe_row_1_2/cordic_1/y_r_reg[1]/CK (DFFQX2)              0.00       0.00 r
+  pe_row_1_2/cordic_1/y_r_reg[1]/Q (DFFQX2)               0.32       0.32 r
+  U8329/Y (NOR2X2)                                        0.07       0.39 f
+  U21983/Y (INVXL)                                        0.07       0.46 r
+  U13448/Y (NOR2XL)                                       0.08       0.53 f
+  U21993/Y (NOR2XL)                                       0.14       0.68 r
+  U19928/Y (XOR2X1)                                       0.25       0.93 f
+  U16841/Y (INVXL)                                        0.19       1.11 r
+  U7938/S (ADDFXL)                                        0.64       1.76 r
+  U17105/Y (NOR2XL)                                       0.06       1.82 f
+  U7843/Y (OAI21XL)                                       0.20       2.02 r
+  U13443/Y (AOI21X1)                                      0.12       2.14 f
+  U22230/Y (OAI21X1)                                      0.18       2.32 r
+  U15602/Y (AOI21XL)                                      0.13       2.45 f
+  U22234/Y (OAI21X1)                                      0.17       2.62 r
+  U22237/Y (AOI21X1)                                      0.10       2.72 f
+  U20002/Y (OAI21XL)                                      0.32       3.04 r
+  U27708/Y (XNOR2X1)                                      0.26       3.30 f
+  U13446/Y (AOI211XL)                                     0.22       3.52 r
+  U27718/Y (OAI21XL)                                      0.12       3.63 f
+  U27719/Y (AOI21X1)                                      0.14       3.77 r
+  U10575/Y (OAI2BB1X2)                                    0.06       3.83 f
+  pe_row_1_2/cordic_1/y_r_reg[11]/D (DFFHQX2)             0.00       3.83 f
+  data arrival time                                                  3.83
 
   clock clk (rise edge)                                   4.10       4.10
   clock network delay (ideal)                             0.00       4.10
   clock uncertainty                                      -0.10       4.00
-  pe_row_1_3/cordic_1/x_r_reg[5]/CK (DFFHQX2)             0.00       4.00 r
-  library setup time                                     -0.18       3.82
-  data required time                                                 3.82
+  pe_row_1_2/cordic_1/y_r_reg[11]/CK (DFFHQX2)            0.00       4.00 r
+  library setup time                                     -0.17       3.83
+  data required time                                                 3.83
   --------------------------------------------------------------------------
-  data required time                                                 3.82
-  data arrival time                                                 -3.82
+  data required time                                                 3.83
+  data arrival time                                                 -3.83
   --------------------------------------------------------------------------
   slack (MET)                                                        0.00
 

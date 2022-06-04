@@ -1,6 +1,6 @@
 ###################################################################
 
-# Created by write_sdc on Sat Jun  4 20:30:41 2022
+# Created by write_sdc on Sat Jun  4 22:22:24 2022
 
 ###################################################################
 set sdc_version 2.1
@@ -122,7 +122,7 @@ set_load -pin_load 0.05 [get_ports {row_out_4_i[2]}]
 set_load -pin_load 0.05 [get_ports {row_out_4_i[1]}]
 set_load -pin_load 0.05 [get_ports {row_out_4_i[0]}]
 set_ideal_network -no_propagate  [get_ports clk]
-set_ideal_network -no_propagate  [get_pins clk_gate_C313/latch/ECK]
+set_ideal_network -no_propagate  [get_pins clk_gate_C293/latch/ECK]
 create_clock [get_ports clk]  -period 4.1  -waveform {0 2.05}
 set_clock_uncertainty 0.1  [get_clocks clk]
 set_input_delay -clock clk  2.05  [get_ports clk]

@@ -7,7 +7,7 @@ Report : power
         -analysis_effort low
 Design : QRD
 Version: R-2020.09-SP5
-Date   : Sat Jun  4 20:30:38 2022
+Date   : Sat Jun  4 22:22:21 2022
 ****************************************
 
 
@@ -29,12 +29,12 @@ Power-specific unit information :
     Leakage Power Units = 1pW
 
 
-  Cell Internal Power  =  10.5032 mW   (78%)
-  Net Switching Power  =   2.9389 mW   (22%)
+  Cell Internal Power  =   8.4451 mW   (81%)
+  Net Switching Power  =   2.0178 mW   (19%)
                          ---------
-Total Dynamic Power    =  13.4421 mW  (100%)
+Total Dynamic Power    =  10.4629 mW  (100%)
 
-Cell Leakage Power     = 219.7412 uW
+Cell Leakage Power     = 165.5803 uW
 
 
                  Internal         Switching           Leakage            Total
@@ -43,10 +43,10 @@ Power Group      Power            Power               Power              Power  
 io_pad             0.0000            0.0000            0.0000            0.0000  (   0.00%)
 memory             0.0000            0.0000            0.0000            0.0000  (   0.00%)
 black_box          0.0000            0.0000            0.0000            0.0000  (   0.00%)
-clock_network  6.0617e-03            0.0000        2.6273e+04        6.0880e-03  (   0.04%)
-register           6.7537            0.1166        3.0833e+07            6.9011  (  50.51%)
+clock_network  6.2167e-03            0.0000        2.6273e+04        6.2429e-03  (   0.06%)
+register           5.5227        5.5810e-02        2.5910e+07            5.6045  (  52.73%)
 sequential         0.0000            0.0000            0.0000            0.0000  (   0.00%)
-combinational      3.7433            2.8224        1.8888e+08            6.7546  (  49.44%)
+combinational      2.9161            1.9620        1.3964e+08            5.0177  (  47.21%)
 --------------------------------------------------------------------------------------------------
-Total             10.5031 mW         2.9389 mW     2.1974e+08 pW        13.6618 mW
+Total              8.4450 mW         2.0178 mW     1.6558e+08 pW        10.6285 mW
 1
