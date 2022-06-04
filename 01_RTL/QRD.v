@@ -15,7 +15,7 @@ module QRD(
 parameter WIDTH = 14;
 parameter ITER = 32;
 parameter HALF_ITER = 16;
-parameter ITER_SWITCH = 14; // 14 -> 16 (13th iteration for CORDIC mult)
+parameter ITER_SWITCH = 13; // 13 -> 16 (13th iteration for CORDIC mult)
 parameter ITER_MAX = ITER-1;
 parameter ITER_LAST = HALF_ITER+ITER_SWITCH;
 
@@ -202,7 +202,7 @@ always @(*) begin
 end
 always @(posedge clk) begin
     if (!rst_n) begin
-        counter_r <= -4;
+        counter_r <= -5;
     end
     else begin
         counter_r <= counter_w;
@@ -240,11 +240,11 @@ end
 
 // Interconnect
 assign {row_in_1_f_1, row_in_1_r_1, row_in_1_i_1} = {row_out_1_f_1, row_out_1_r_1, row_out_1_i_1};
-assign {row_in_1_f_2, row_in_1_r_2, row_in_1_i_2} = row_buf_1_1_r;
-assign {row_in_1_f_3, row_in_1_r_3, row_in_1_i_3} = row_buf_1_2_r;
+assign {row_in_1_f_2, row_in_1_r_2, row_in_1_i_2} = {row_out_1_f_2, row_out_1_r_2, row_out_1_i_2};
+assign {row_in_1_f_3, row_in_1_r_3, row_in_1_i_3} = {row_out_1_f_3, row_out_1_r_3, row_out_1_i_3};
 
 assign {row_in_2_f_2, row_in_2_r_2, row_in_2_i_2} = {row_out_2_f_2, row_out_2_r_2, row_out_2_i_2};
-assign {row_in_2_f_3, row_in_2_r_3, row_in_2_i_3} = row_buf_2_1_r;
+assign {row_in_2_f_3, row_in_2_r_3, row_in_2_i_3} = {row_out_2_f_3, row_out_2_r_3, row_out_2_i_3};
 
 assign {row_in_3_f_3, row_in_3_r_3, row_in_3_i_3} = {row_out_3_f_3, row_out_3_r_3, row_out_3_i_3};
 
@@ -256,31 +256,6 @@ assign {col_in_2_f_2, col_in_2_r_2, col_in_2_i_2} = {col_out_2_f_2, col_out_2_r_
 assign {col_in_3_r_1, col_in_3_i_1} = {col_out_3_r_1, col_out_3_i_1};
 assign {col_in_3_r_2, col_in_3_i_2} = {col_out_3_r_2, col_out_3_i_2};
 assign {col_in_3_r_3, col_in_3_i_3} = {col_out_3_r_3, col_out_3_i_3};
-
-
-always @(*) begin
-    row_buf_1_1_w = {row_out_1_f_2, row_out_1_r_2, row_out_1_i_2};
-    row_buf_1_2_w = {row_out_1_f_3, row_out_1_r_3, row_out_1_i_3};
-    row_buf_1_3_w = {1'b0, row_out_1_r_4, row_out_1_i_4};
-    row_buf_2_1_w = {row_out_2_f_3, row_out_2_r_3, row_out_2_i_3};
-    row_buf_2_2_w = {1'b0, row_out_2_r_4, row_out_2_i_4};
-    row_buf_3_1_w = {1'b0, row_out_3_r_4, row_out_3_i_4};
-    col_buf_1_2_w = {col_out_2_f_1, col_out_2_r_1, col_out_2_i_1};
-    col_buf_1_3_w = {1'b0, col_out_3_r_1, col_out_3_i_1};
-    col_buf_2_2_w = {1'b0, col_out_3_r_2, col_out_3_i_2};
-end
-
-always @(posedge clk) begin
-    row_buf_1_1_r <= row_buf_1_1_w;
-    row_buf_1_2_r <= row_buf_1_2_w;
-    row_buf_1_3_r <= row_buf_1_3_w;
-    row_buf_2_1_r <= row_buf_2_1_w;
-    row_buf_2_2_r <= row_buf_2_2_w;
-    row_buf_3_1_r <= row_buf_3_1_w;
-    col_buf_1_2_r <= col_buf_1_2_w;
-    col_buf_1_3_r <= col_buf_1_3_w;
-    col_buf_2_2_r <= col_buf_2_2_w;
-end
 
 // Input buffer
 always @(*) begin
