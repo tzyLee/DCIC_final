@@ -16,8 +16,8 @@ parameter IN_width		= 14;
 // parameter latency_limit	= 68;
 parameter TIMEOUT       = 1000;
 
-parameter CYCLE			= 10.0;
-parameter ERR_THRESHOLD = 6;
+parameter CYCLE			= 3.9;
+parameter ERR_THRESHOLD = 16;
 
 reg signed [IN_width-1:0] din_r, din_i;
 
@@ -88,8 +88,8 @@ initial begin
 
 		case(i)
 		0: begin
-			fp_r = $fopen("../TEST_PATTERN/in_real_pattern01.txt", "r");
-			fp_i = $fopen("../TEST_PATTERN/in_imag_pattern01.txt", "r");
+			fp_r = $fopen("../TEST_PATTERN/in_real_pattern02.txt", "r");
+			fp_i = $fopen("../TEST_PATTERN/in_imag_pattern02.txt", "r");
 		end
 		default: begin
 			$display("Missing dataset.");
@@ -133,8 +133,8 @@ initial begin
 		// Read golden data
 		case(i)
 		0: begin
-			fp_r = $fopen("../TEST_PATTERN/out_R_real_golden01.txt", "r");
-			fp_i = $fopen("../TEST_PATTERN/out_R_imag_golden01.txt", "r");
+			fp_r = $fopen("../TEST_PATTERN/out_R_real_golden02.txt", "r");
+			fp_i = $fopen("../TEST_PATTERN/out_R_imag_golden02.txt", "r");
 		end
 		default: begin
 			$display("Missing dataset.");
@@ -163,8 +163,8 @@ initial begin
 
 		case(i)
 		0: begin
-			fp_r = $fopen("../TEST_PATTERN/out_QH_real_golden01.txt", "r");
-			fp_i = $fopen("../TEST_PATTERN/out_QH_imag_golden01.txt", "r");
+			fp_r = $fopen("../TEST_PATTERN/out_QH_real_golden02.txt", "r");
+			fp_i = $fopen("../TEST_PATTERN/out_QH_imag_golden02.txt", "r");
 		end
 		default: begin
 			$display("Missing dataset.");
