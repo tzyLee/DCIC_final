@@ -15,7 +15,7 @@ module QRD(
 parameter WIDTH = 14;
 parameter ITER = 32;
 parameter HALF_ITER = 16;
-parameter ITER_SWITCH = 3; // 14 -> 16 (13th iteration for CORDIC mult)
+parameter ITER_SWITCH = 4; // 14 -> 16 (13th iteration for CORDIC mult)
 parameter ITER_LAST = HALF_ITER+ITER_SWITCH;
 
 localparam STATE_IDLE = 0;
@@ -86,6 +86,8 @@ wire pipeline_clk, input_clk;
 reg [3:0] state_r, state_w;
 
 reg [4:0] counter_r, counter_w;
+
+reg [3:0] shift1, shift2, shift3;
 reg start_output_r, start_output_w;
 
 /* 1st row */
@@ -96,6 +98,7 @@ DU #(.WIDTH(WIDTH)) du_row_1(
 );
 PE #(.WIDTH(WIDTH)) pe_row_1_1(
     .clk(clk), .rst_n(rst_n), .switch(PE_switch),
+    .shift1(shift1), .shift2(shift2), .shift3(shift3),
     .load(PE_load), .iter(counter_r[3:0]), .subload(CORDIC_load),
     .din_a_r(row_in_1_r_1),   .din_a_i(row_in_1_i_1),   .din_a_f(row_in_1_f_1),
     .din_b_r(in_row_2_r_r),   .din_b_i(in_row_2_i_r),   .din_b_f(in_row_2_f_r),
@@ -104,6 +107,7 @@ PE #(.WIDTH(WIDTH)) pe_row_1_1(
 );
 PE #(.WIDTH(WIDTH)) pe_row_1_2(
     .clk(clk), .rst_n(rst_n), .switch(PE_switch),
+    .shift1(shift1), .shift2(shift2), .shift3(shift3),
     .load(PE_load), .iter(counter_r[3:0]), .subload(CORDIC_load),
     .din_a_r(row_in_1_r_2),   .din_a_i(row_in_1_i_2),   .din_a_f(row_in_1_f_2),
     .din_b_r(in_row_3_r_r),   .din_b_i(in_row_3_i_r),   .din_b_f(in_row_3_f_r),
@@ -112,6 +116,7 @@ PE #(.WIDTH(WIDTH)) pe_row_1_2(
 );
 PE #(.WIDTH(WIDTH)) pe_row_1_3(
     .clk(clk), .rst_n(rst_n), .switch(PE_switch),
+    .shift1(shift1), .shift2(shift2), .shift3(shift3),
     .load(PE_load), .iter(counter_r[3:0]), .subload(CORDIC_load),
     .din_a_r(row_in_1_r_3),   .din_a_i(row_in_1_i_3),   .din_a_f(row_in_1_f_3),
     .din_b_r(in_row_4_r_r),   .din_b_i(in_row_4_i_r),   .din_b_f(),
@@ -127,6 +132,7 @@ DU #(.WIDTH(WIDTH)) du_row_2(
 );
 PE #(.WIDTH(WIDTH)) pe_row_2_2(
     .clk(clk), .rst_n(rst_n), .switch(PE_switch),
+    .shift1(shift1), .shift2(shift2), .shift3(shift3),
     .load(PE_load), .iter(counter_r[3:0]), .subload(CORDIC_load),
     .din_a_r(row_in_2_r_2), .din_a_i(row_in_2_i_2), .din_a_f(row_in_2_f_2),
     .din_b_r(col_in_2_r_1), .din_b_i(col_in_2_i_1), .din_b_f(col_in_2_f_1),
@@ -135,6 +141,7 @@ PE #(.WIDTH(WIDTH)) pe_row_2_2(
 );
 PE #(.WIDTH(WIDTH)) pe_row_2_3(
     .clk(clk), .rst_n(rst_n), .switch(PE_switch),
+    .shift1(shift1), .shift2(shift2), .shift3(shift3),
     .load(PE_load), .iter(counter_r[3:0]), .subload(CORDIC_load),
     .din_a_r(row_in_2_r_3),   .din_a_i(row_in_2_i_3),   .din_a_f(row_in_2_f_3),
     .din_b_r(col_in_3_r_1),   .din_b_i(col_in_3_i_1),   .din_b_f(),
@@ -150,6 +157,7 @@ DU #(.WIDTH(WIDTH)) du_row_3(
 );
 PE #(.WIDTH(WIDTH)) pe_row_3_3(
     .clk(clk), .rst_n(rst_n), .switch(PE_switch),
+    .shift1(shift1), .shift2(shift2), .shift3(shift3),
     .load(PE_load), .iter(counter_r[3:0]), .subload(CORDIC_load),
     .din_a_r(row_in_3_r_3),   .din_a_i(row_in_3_i_3),   .din_a_f(row_in_3_f_3),
     .din_b_r(col_in_3_r_2),   .din_b_i(col_in_3_i_2),   .din_b_f(),
@@ -185,6 +193,15 @@ assign in_ready = (state_r == STATE_WAIT && counter_r != ITER_LAST) ||
 assign out_valid = counter_r == ITER_LAST && start_output_r;
 
 always @(*) begin
+    case(counter_r[3:0])
+    4'b0000: begin shift1 = 0; shift2 = 1; shift3 = 2; end
+    4'b0001: begin shift1 = 3; shift2 = 4; shift3 = 5; end
+    4'b0010: begin shift1 = 6; shift2 = 7; shift3 = 8; end
+    default: begin shift1 = 0; shift2 = 0; shift3 = 0; end
+    endcase
+end
+
+always @(*) begin
     case (state_r)
     STATE_IDLE:  counter_w = counter_r;
     STATE_WAIT:  counter_w = counter_r == ITER_LAST ? 0 : counter_r+1;
@@ -196,7 +213,7 @@ always @(*) begin
 end
 always @(posedge clk) begin
     if (!rst_n) begin
-        counter_r <= -15;
+        counter_r <= -14;
     end
     else begin
         counter_r <= counter_w;
@@ -318,6 +335,9 @@ module PE(
     load,
     subload,
     iter,
+    shift1,
+    shift2,
+    shift3,
     din_a_f,
     din_a_r,
     din_a_i,
@@ -339,7 +359,7 @@ parameter WIDTH = 14;
 
 input clk, rst_n;
 input switch, load, subload;
-input [3:0] iter;
+input [3:0] iter, shift1, shift2, shift3;
 input din_a_f, din_b_f;
 input signed [WIDTH-1:0] din_a_r, din_a_i,
                          din_b_r, din_b_i;
@@ -377,12 +397,14 @@ assign cordic_2_z = is_vec_mode_nxt ? 0 : (switch ? ang_b_r : ang_1_r);
 
 CORDIC #(.WIDTH(WIDTH)) cordic_1(
     .clk(clk), .is_vec_mode(is_vec_mode), .nxt_mode(is_vec_mode_nxt),
+    .shift1(shift1), .shift2(shift2), .shift3(shift3),
     .load(subload), .iter(iter),
     .din_x(cordic_1_x), .din_y(cordic_1_y), .din_z(cordic_1_z),
     .dout_x(cordic_1_x_out), .dout_y(cordic_1_y_out), .dout_z(cordic_1_z_out)
 );
 CORDIC #(.WIDTH(WIDTH)) cordic_2(
     .clk(clk), .is_vec_mode(is_vec_mode), .nxt_mode(is_vec_mode_nxt),
+    .shift1(shift1), .shift2(shift2), .shift3(shift3),
     .load(subload), .iter(iter),
     .din_x(cordic_2_x), .din_y(cordic_2_y), .din_z(cordic_2_z),
     .dout_x(cordic_2_x_out), .dout_y(cordic_2_y_out), .dout_z(cordic_2_z_out)
@@ -390,9 +412,9 @@ CORDIC #(.WIDTH(WIDTH)) cordic_2(
 
 always @(*) begin
     // angle can be retrieved 1 cycle before mult is finished
-    ang_a_w = is_vec_mode && !switch && iter == 2 ? -cordic_1_z_out : ang_a_r;
-    ang_b_w = is_vec_mode && !switch && iter == 2 ? -cordic_2_z_out : ang_b_r;
-    ang_1_w = is_vec_mode && switch && iter == 2 ? -cordic_1_z_out : ang_1_r;
+    ang_a_w = is_vec_mode && !switch && iter == 3 ? -cordic_1_z_out : ang_a_r;
+    ang_b_w = is_vec_mode && !switch && iter == 3 ? -cordic_2_z_out : ang_b_r;
+    ang_1_w = is_vec_mode && switch && iter == 3 ? -cordic_1_z_out : ang_1_r;
 end
 
 always @(*) begin
@@ -457,6 +479,9 @@ module CORDIC(
     clk,
     is_vec_mode,
     nxt_mode,
+    shift1,
+    shift2,
+    shift3,
     load,
     iter,
     din_x,
@@ -471,13 +496,13 @@ parameter WIDTH = 14;
 parameter GAIN_WIDTH = 10; // 10 fraction bits
 
 input clk, is_vec_mode, nxt_mode, load;
-input [3:0] iter;
+input [3:0] iter, shift1, shift2, shift3;
 input signed [WIDTH-1:0] din_x, din_y, din_z;
 output signed [WIDTH-1:0] dout_x, dout_y, dout_z;
 
 reg signed [WIDTH-1:0] x_r, x_w;
 reg signed [WIDTH-1:0] y_r, y_w;
-reg signed [WIDTH-1:0] z_r, z_w, dz, dz2, dz3, dz4;
+reg signed [WIDTH-1:0] z_r, z_w, dz, dz2, dz3;
 reg should_mult_r, should_mult_w;
 reg xy_inv_r, xy_inv_w;
 
@@ -488,8 +513,6 @@ wire signed [WIDTH-1:0] x_sft2, y_sft2;
 wire signed [WIDTH-1:0] x_nxt2, y_nxt2, z_nxt2;
 wire signed [WIDTH-1:0] x_sft3, y_sft3;
 wire signed [WIDTH-1:0] x_nxt3, y_nxt3, z_nxt3;
-wire signed [WIDTH-1:0] x_sft4, y_sft4;
-wire signed [WIDTH-1:0] x_nxt4, y_nxt4, z_nxt4;
 
 wire signed [WIDTH-1:0] x_mult, y_mult;
 wire signed [WIDTH-1:0] x_update, y_update, z_update;
@@ -500,39 +523,35 @@ wire din_z_neg_out, din_z_pos_out;
 wire signed [WIDTH-1:0] din_x_fixed;
 wire signed [WIDTH-1:0] din_y_fixed;
 wire signed [WIDTH-1:0] din_z_fixed;
-wire mode, mode2, mode3, mode4;
-wire update, update1, update2, update3, update4;
+wire mode, mode2, mode3;
+wire update, update1, update2, update3;
 wire [3:0] iter2;
 
 always @(*) begin
     case (iter)
     4'b0000: dz = 'b00001100100100;
-    4'b0001: dz = 'b00000001000000;
-    4'b0010: dz = 'b00000000000100;
+    4'b0001: dz = 'b00000001111111;
+    4'b0010: dz = 'b00000000010000;
+    4'b0011: dz = 'b00000000000010;
     default: dz = 'b00000000000000;
     endcase
 end
 always @(*) begin
     case (iter)
     4'b0000: dz3 = 'b00000011111011;
-    4'b0001: dz3 = 'b00000000010000;
-    4'b0010: dz3 = 'b00000000000001;
+    4'b0001: dz3 = 'b00000000100000;
+    4'b0010: dz3 = 'b00000000000100;
+    4'b0011: dz3 = 'b00000000000000;
     default: dz3 = 'b00000000000000;
     endcase
 end
-always @(*) begin
-    case (iter)
-    4'b0000: dz4 = 'b00000001111111;
-    4'b0001: dz4 = 'b00000000001000;
-    4'b0010: dz4 = 'b00000000000000;
-    default: dz4 = 'b00000000000000;
-    endcase
-end
+
 always @(*) begin
     case (iter)
     4'b0000: dz2 = 'b00000111011011;
-    4'b0001: dz2 = 'b00000000100000;
-    4'b0010: dz2 = 'b00000000000010;
+    4'b0001: dz2 = 'b00000001000000;
+    4'b0010: dz2 = 'b00000000001000;
+    4'b0011: dz2 = 'b00000000000001;
     default: dz2 = 'b00000000000000;
     endcase
 end
@@ -573,16 +592,11 @@ assign x_nxt3 = mode3 ? (x_nxt2 + y_sft3) : (x_nxt2 - y_sft3);
 assign y_nxt3 = mode3 ? (y_nxt2 - x_sft3) : (y_nxt2 + x_sft3);
 assign z_nxt3 = mode3 ? (z_nxt2 + dz3) : (z_nxt2 - dz3);
 
-assign mode4 = (is_vec_mode && y_nxt3 > 0) || (!is_vec_mode && z_nxt3 < 0);
-assign update4 = (is_vec_mode && y_nxt3 != 0) || (!is_vec_mode && z_nxt3 != 0);
-assign x_nxt4 = mode4 ? (x_nxt3 + y_sft4) : (x_nxt3 - y_sft4);
-assign y_nxt4 = mode4 ? (y_nxt3 - x_sft4) : (y_nxt3 + x_sft4);
-assign z_nxt4 = mode4 ? (z_nxt3 + dz4) : (z_nxt3 - dz4);
 
 assign update = update1;
-assign x_update = update4 ? x_nxt4 : update3 ? x_nxt3 : update2 ? x_nxt2 : x_nxt;
-assign y_update = update4 ? y_nxt4 : update3 ? y_nxt3 : update2 ? y_nxt2 : y_nxt;
-assign z_update = update4 ? z_nxt4 : update3 ? z_nxt3 : update2 ? z_nxt2 : z_nxt;
+assign x_update = update3 ? x_nxt3 : update2 ? x_nxt2 : x_nxt;
+assign y_update = update3 ? y_nxt3 : update2 ? y_nxt2 : y_nxt;
+assign z_update = update3 ? z_nxt3 : update2 ? z_nxt2 : z_nxt;
 
 assign din_x_is_neg = din_x < 0;
 assign din_y_is_neg = din_y < 0;
@@ -603,27 +617,24 @@ assign din_z_fixed = (
                          din_z
 ));
 
-BarrelShifter #(.WIDTH(WIDTH)) shift1 (.din(x_r), .shift({iter[1:0], 2'b00}), .dout(x_sft));
-BarrelShifter #(.WIDTH(WIDTH)) shift2 (.din(y_r), .shift({iter[1:0], 2'b00}), .dout(y_sft));
+BarrelShifter #(.WIDTH(WIDTH)) shifter1 (.din(x_r), .shift(shift1), .dout(x_sft));
+BarrelShifter #(.WIDTH(WIDTH)) shifter2 (.din(y_r), .shift(shift1), .dout(y_sft));
 
-BarrelShifter #(.WIDTH(WIDTH)) shift3 (.din(x_nxt), .shift({iter[1:0], 2'b01}), .dout(x_sft2));
-BarrelShifter #(.WIDTH(WIDTH)) shift4 (.din(y_nxt), .shift({iter[1:0], 2'b01}), .dout(y_sft2));
+BarrelShifter #(.WIDTH(WIDTH)) shifter3 (.din(x_nxt), .shift(shift2), .dout(x_sft2));
+BarrelShifter #(.WIDTH(WIDTH)) shifter4 (.din(y_nxt), .shift(shift2), .dout(y_sft2));
 
-BarrelShifter #(.WIDTH(WIDTH)) shift5 (.din(x_nxt2), .shift({iter[1:0], 2'b10}), .dout(x_sft3));
-BarrelShifter #(.WIDTH(WIDTH)) shift6 (.din(y_nxt2), .shift({iter[1:0], 2'b10}), .dout(y_sft3));
-
-BarrelShifter #(.WIDTH(WIDTH)) shift7 (.din(x_nxt3), .shift({iter[1:0], 2'b11}), .dout(x_sft4));
-BarrelShifter #(.WIDTH(WIDTH)) shift8 (.din(y_nxt3), .shift({iter[1:0], 2'b11}), .dout(y_sft4));
+BarrelShifter #(.WIDTH(WIDTH)) shifter5 (.din(x_nxt2), .shift(shift3), .dout(x_sft3));
+BarrelShifter #(.WIDTH(WIDTH)) shifter6 (.din(y_nxt2), .shift(shift3), .dout(y_sft3));
 
 always @(*) begin
     x_w = load ? din_x_fixed : (
-        iter == 2 ? x_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] : // remove fractions
+        iter == 3 ? x_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] : // remove fractions
         update ? x_update : (xy_inv_r ? -x_r : x_r)
     );
 end
 always @(*) begin
     y_w = load ? din_y_fixed : (
-        iter == 2 ? y_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] :
+        iter == 3 ? y_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] :
         update ? y_update : (xy_inv_r ? -y_r : y_r)
     );
 end
