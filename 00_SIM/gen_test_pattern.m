@@ -1,7 +1,7 @@
 %% Settings
-dir = "..\TEST_PATTERN";
-out_pattern_name = "pattern02";
-out_golden_name = "golden02";
+dir = "TEST_PATTERN";
+out_pattern_name = "pattern01";
+out_golden_name = "golden01";
 
 WORD_LEN = 14;
 FRAC_LEN = WORD_LEN-4;
@@ -19,13 +19,9 @@ F = fimath(...
 globalfimath(F);
 
 %% Data generation
-% H = (randn(4, 4) + 1j.*randn(4, 4)) ./ sqrt(2);
-% 
-% Hf = fi(H, 1, WORD_LEN, FRAC_LEN);
-data = load("../TEST_PATTERN/H_pattern01.mat");
-Hf = data.Hf;
-H = data.H;
+H = (randn(4, 4) + 1j.*randn(4, 4)) ./ sqrt(2);
 
+Hf = fi(H, 1, WORD_LEN, FRAC_LEN);
 [Q, R] = QRD_CORDIC_14(Hf, ITER);
 QH = Q';
 

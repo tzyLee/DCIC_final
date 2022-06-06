@@ -3,7 +3,7 @@
 Report : area
 Design : QRD
 Version: R-2020.09-SP5
-Date   : Sun Jun  5 00:34:33 2022
+Date   : Mon Jun  6 13:27:05 2022
 ****************************************
 
 Information: Updating design information... (UID-85)
@@ -11,21 +11,21 @@ Library(s) Used:
 
     slow (File: /home/raid7_2/course/cvsd/CBDK_IC_Contest/CIC/SynopsysDC/db/slow.db)
 
-Number of ports:                          235
-Number of nets:                         24073
-Number of cells:                        23371
-Number of combinational cells:          22339
+Number of ports:                         1339
+Number of nets:                         57292
+Number of cells:                        54792
+Number of combinational cells:          53596
 Number of sequential cells:              1028
 Number of macros/black boxes:               0
-Number of buf/inv:                       3751
-Number of references:                     176
+Number of buf/inv:                       9423
+Number of references:                      63
 
-Combinational area:             177211.954358
-Buf/Inv area:                    14115.578185
-Noncombinational area:           34228.071415
+Combinational area:             454127.486464
+Buf/Inv area:                    38690.535047
+Noncombinational area:           33980.251078
 Macro/Black Box area:                0.000000
 Net Interconnect area:      undefined  (No wire load specified)
 
-Total cell area:                211440.025773
+Total cell area:                488107.737542
 Total area:                 undefined
 1

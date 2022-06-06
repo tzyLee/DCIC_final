@@ -7,7 +7,7 @@ Report : power
         -analysis_effort low
 Design : QRD
 Version: R-2020.09-SP5
-Date   : Sun Jun  5 00:34:38 2022
+Date   : Mon Jun  6 13:27:17 2022
 ****************************************
 
 
@@ -29,12 +29,12 @@ Power-specific unit information :
     Leakage Power Units = 1pW
 
 
-  Cell Internal Power  =  13.5219 mW   (85%)
-  Net Switching Power  =   2.4525 mW   (15%)
+  Cell Internal Power  =  15.3437 mW   (64%)
+  Net Switching Power  =   8.7793 mW   (36%)
                          ---------
-Total Dynamic Power    =  15.9743 mW  (100%)
+Total Dynamic Power    =  24.1230 mW  (100%)
 
-Cell Leakage Power     = 157.0587 uW
+Cell Leakage Power     = 361.7713 uW
 
 
                  Internal         Switching           Leakage            Total
@@ -43,10 +43,10 @@ Power Group      Power            Power               Power              Power  
 io_pad             0.0000            0.0000            0.0000            0.0000  (   0.00%)
 memory             0.0000            0.0000            0.0000            0.0000  (   0.00%)
 black_box          0.0000            0.0000            0.0000            0.0000  (   0.00%)
-clock_network  8.7370e-03            0.0000        2.6273e+04        8.7633e-03  (   0.05%)
-register          10.0739            0.1612        3.2289e+07           10.2674  (  63.65%)
+clock_network  4.7709e-03            0.0000        2.6273e+04        4.7972e-03  (   0.02%)
+register           5.2239            0.1313        3.2181e+07            5.3874  (  22.00%)
 sequential         0.0000            0.0000            0.0000            0.0000  (   0.00%)
-combinational      3.4392            2.2913        1.2474e+08            5.8552  (  36.30%)
+combinational     10.1148            8.6479        3.2956e+08           19.0924  (  77.98%)
 --------------------------------------------------------------------------------------------------
-Total             13.5218 mW         2.4524 mW     1.5706e+08 pW        16.1314 mW
+Total             15.3436 mW         8.7793 mW     3.6177e+08 pW        24.4847 mW
 1

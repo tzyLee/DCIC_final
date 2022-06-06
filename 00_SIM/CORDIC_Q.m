@@ -13,10 +13,6 @@ function [x_out, y_out, z_out] = CORDIC_Q(x, y, z, mode, iter)
     end
     qgain = fi(qgain, 0, 10, 10);
 
-    alt_gain = [-2^-2, -2^-3, -2^-4, -2^-5, -2^-5, 2^-6, 2^-6, 2^-7, 2^-7, 2^-7, -2^-8];
-    alt_gain = cumprod(1 + alt_gain);
-
-
 %    x = fi(x, 1, WORD_LEN, FRAC_LEN);
 %    y = fi(y, 1, WORD_LEN, FRAC_LEN);
 %    z = fi(z, 1, WORD_LEN, FRAC_LEN);
