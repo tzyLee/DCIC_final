@@ -10,7 +10,7 @@ decoders = ["K-Best (k=16, sorting)", ...
 
 %% Simulation
 % BER = simulation(N_T, N_R, "16-QAM", 1600, 100000, EbN0, decoders);
-load('BER-16-QAM.mat')
+load('BER-64-QAM.mat')
 
 % Plot
 figure;

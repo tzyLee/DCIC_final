@@ -46,11 +46,13 @@ F = fimath(...
   'SumFractionLength', get(Hf, 'FractionLength'));
 
 globalfimath(F);
+y = cast([1+4j; 2+2j; 3+3j; 4+1j]./4./sqrt(2), 'like', Hf);
 
 % [Q, R] = qr(H);
 [Q, R] = QRD_GR(H);
+z = Q'*y;
 % Hf = fi(H, 1, 18, 14);
-[QC, RC] = QRD_CORDIC(Hf, 13);
+[QC, RC, QHy] = QRD_CORDIC(Hf, y, 13);
 QC = double(QC);
 RC = double(RC);
 
