@@ -102,15 +102,13 @@ PE #(.WIDTH(WIDTH)) pe_row_1_1(
     .dout_x_r(row_out_1_r_2), .dout_x_i(row_out_1_i_2), .dout_x_f(row_out_1_f_2),
     .dout_y_r(col_out_1_r_1), .dout_y_i(col_out_1_i_1), .dout_y_f(col_out_1_f_1)
 );
-// PE #(.WIDTH(WIDTH)) pe_row_1_2(
-//     .clk(clk), .rst_n(rst_n), .switch(PE_switch),
-//     .shift1(shift1), .shift2(shift2), .shift3(shift3),
-//     .load(PE_load), .iter(counter_r[3:0]), .subload(CORDIC_load),
-//     .din_a_r(row_in_1_r_2),   .din_a_i(row_in_1_i_2),   .din_a_f(row_in_1_f_2),
-//     .din_b_r(in_row_3_r_r),   .din_b_i(in_row_3_i_r),   .din_b_f(in_row_3_f_r),
-//     .dout_x_r(row_out_1_r_3), .dout_x_i(row_out_1_i_3), .dout_x_f(row_out_1_f_3),
-//     .dout_y_r(col_out_2_r_1), .dout_y_i(col_out_2_i_1), .dout_y_f(col_out_2_f_1)
-// );
+PE #(.WIDTH(WIDTH)) pe_row_1_2(
+    .clk(clk), .rst_n(rst_n),
+    .din_a_r(row_in_1_r_2),   .din_a_i(row_in_1_i_2),   .din_a_f(row_in_1_f_2),
+    .din_b_r(in_row_3_r_r),   .din_b_i(in_row_3_i_r),   .din_b_f(in_row_3_f_r),
+    .dout_x_r(row_out_1_r_3), .dout_x_i(row_out_1_i_3), .dout_x_f(row_out_1_f_3),
+    .dout_y_r(col_out_2_r_1), .dout_y_i(col_out_2_i_1), .dout_y_f(col_out_2_f_1)
+);
 // PE #(.WIDTH(WIDTH)) pe_row_1_3(
 //     .clk(clk), .rst_n(rst_n), .switch(PE_switch),
 //     .shift1(shift1), .shift2(shift2), .shift3(shift3),
@@ -350,12 +348,12 @@ output signed [WIDTH-1:0] dout_x_r, dout_x_i,
 reg din_a_f_r, din_a_f_w;
 reg din_b_f_r, din_b_f_w;
 
-reg [ITER-1:0] dir_a_r;
-wire [ITER-1:0] dir_a_w;
-reg [ITER-1:0] dir_b_r;
-wire [ITER-1:0] dir_b_w;
-reg [ITER-1:0] dir_1_r;
-wire [ITER-1:0] dir_1_w;
+reg [ITER-1:0] dir_a_r, update_a_r;
+wire [ITER-1:0] dir_a_w, update_a_w;
+reg [ITER-1:0] dir_b_r, update_b_r;
+wire [ITER-1:0] dir_b_w, update_b_w;
+reg [ITER-1:0] dir_1_r, update_1_r;
+wire [ITER-1:0] dir_1_w, update_1_w;
 
 reg [ITER+1:0] din_vec_1_r, din_vec_1_w;
 reg [ITER+1:0] din_vec_2_r, din_vec_2_w;
@@ -385,23 +383,23 @@ assign cordic_4_z = 0; //is_vec_mode_nxt2 ? 0 : ang_1_r;
 // TODO share is_vec_r between cordic_1 and cordic_2
 // TODO share ang_1 between cordic_3 and cordic_4
 PipelinedCORDIC #(.WIDTH(WIDTH), .ITER(ITER)) cordic_1(
-    .clk(clk), .nxt_mode(is_vec_mode_nxt),
+    .clk(clk), .nxt_mode(is_vec_mode_nxt), .din_update(update_a_r), .dout_update(update_a_w),
     .din_x(din_a_r), .din_y(din_a_i), .din_z(cordic_1_z), .din_dir(dir_a_r), .din_vec(din_vec_1_r),
     .dout_x(cordic_1_x_out), .dout_y(cordic_1_y_out), .dout_z(cordic_1_z_out), .dout_dir(dir_a_w)
 );
 PipelinedCORDIC #(.WIDTH(WIDTH), .ITER(ITER)) cordic_2(
-    .clk(clk), .nxt_mode(is_vec_mode_nxt),
+    .clk(clk), .nxt_mode(is_vec_mode_nxt), .din_update(update_b_r), .dout_update(update_b_w),
     .din_x(din_b_r), .din_y(din_b_i), .din_z(cordic_2_z), .din_dir(dir_b_r), .din_vec(din_vec_1_r),
     .dout_x(cordic_2_x_out), .dout_y(cordic_2_y_out), .dout_z(cordic_2_z_out), .dout_dir(dir_b_w)
 );
 
 PipelinedCORDIC #(.WIDTH(WIDTH), .ITER(ITER)) cordic_3(
-    .clk(clk), .nxt_mode(din_vec_1_r[ITER+1]),
+    .clk(clk), .nxt_mode(din_vec_1_r[ITER+1]), .din_update(update_1_r), .dout_update(update_1_w),
     .din_x(cordic_1_x_out), .din_y(cordic_2_x_out), .din_z(cordic_3_z), .din_dir(dir_1_r), .din_vec(din_vec_2_r),
     .dout_x(cordic_3_x_out), .dout_y(cordic_3_y_out), .dout_z(cordic_3_z_out), .dout_dir(dir_1_w)
 );
 PipelinedCORDICNoVec #(.WIDTH(WIDTH), .ITER(ITER)) cordic_4(
-    .clk(clk), .nxt_mode(din_vec_1_r[ITER+1]),
+    .clk(clk), .nxt_mode(din_vec_1_r[ITER+1]), .din_update(update_1_r), .dout_update(),
     .din_x(cordic_1_y_out), .din_y(cordic_2_y_out), .din_z(cordic_4_z), .din_dir(dir_1_r), .din_vec(din_vec_2_r),
     .dout_x(cordic_4_x_out), .dout_y(cordic_4_y_out), .dout_z(cordic_4_z_out), .dout_dir()
 );
@@ -410,6 +408,9 @@ always @(posedge clk) begin
     dir_a_r <= dir_a_w;
     dir_b_r <= dir_b_w;
     dir_1_r <= dir_1_w;
+    update_a_r <= update_a_w;
+    update_b_r <= update_b_w;
+    update_1_r <= update_1_w;
 end
 
 always @(*) begin
@@ -473,10 +474,12 @@ module PipelinedCORDIC(
     din_z,
     din_dir,
     din_vec,
+    din_update,
     dout_x,
     dout_y,
     dout_z,
-    dout_dir
+    dout_dir,
+    dout_update
 );
 
 parameter WIDTH = 14;
@@ -490,6 +493,8 @@ output signed [WIDTH-1:0] dout_x, dout_y, dout_z;
 input [ITER-1:0] din_dir;
 output [ITER-1:0] dout_dir;
 input [ITER+1:0] din_vec;
+input [ITER-1:0] din_update;
+output [ITER-1:0] dout_update;
 
 reg signed [WIDTH-1:0] x_r[0:ITER+1], x_w[0:ITER+1];
 reg signed [WIDTH-1:0] y_r[0:ITER+1], y_w[0:ITER+1];
@@ -497,6 +502,8 @@ reg signed [WIDTH-1:0] z_r[0:ITER+1], z_w[0:ITER+1];
 
 // reg signed dir_r[0:ITER-1], dir_w[0:ITER-1];
 reg xy_inv_r[0:ITER], xy_inv_w[0:ITER];
+reg [ITER-1:0] should_mult_r;
+wire [ITER-1:0] should_mult_w;
 
 // Wire
 wire signed [WIDTH-1:0] x_nxt[0:ITER-1], y_nxt[0:ITER-1], z_nxt[0:ITER-1];
@@ -535,8 +542,14 @@ assign dz[7] = 'b00000000001000;
 assign x_mult = (xy_inv_r[ITER] ? -x_r[ITER] : x_r[ITER]);
 assign y_mult = (xy_inv_r[ITER] ? -y_r[ITER] : y_r[ITER]);
 always @(*) begin
-    x_prod = $signed('b1001101110) * x_mult;
-    y_prod = $signed('b1001101110) * y_mult;
+    if (should_mult_r[ITER-1]) begin
+        x_prod = $signed('b1001101110) * x_mult;
+        y_prod = $signed('b1001101110) * y_mult;
+    end
+    else begin
+        x_prod = {x_mult, {GAIN_WIDTH{1'b0}}};
+        y_prod = {y_mult, {GAIN_WIDTH{1'b0}}};
+    end
 end
 
 always @(*) begin
@@ -584,16 +597,25 @@ end
 
 for (gi=0; gi<ITER; gi=gi+1) begin : generate_CORDIC_iter
     assign mode[gi] = (din_vec[gi] && y_r[gi] > 0) || (!din_vec[gi] && din_dir[gi]);
-    assign update[gi] = (din_vec[gi] && y_r[gi] != 0) || (!din_vec[gi]); // TODO z_r in rot
+    assign update[gi] = (din_vec[gi] && y_r[gi] != 0) || (!din_vec[gi] && din_update[gi]);
     assign x_nxt[gi] = mode[gi] ? x_r[gi] + (y_r[gi] >>> gi) : x_r[gi] - (y_r[gi] >>> gi);
     assign y_nxt[gi] = mode[gi] ? y_r[gi] - (x_r[gi] >>> gi) : y_r[gi] + (x_r[gi] >>> gi);
     assign z_nxt[gi] = mode[gi] ? z_r[gi] + dz[gi] : z_r[gi] - dz[gi];
+    // Update angle when in vectoring mode
     assign dout_dir[gi] = din_vec[gi] ? mode[gi] : din_dir[gi];
+    assign dout_update[gi] = din_vec[gi] ? update[gi] : din_update[gi];
+
+    if (gi == 0) begin
+        assign should_mult_w[0] = update[0];
+    end
+    else begin
+        assign should_mult_w[gi] = update[gi] || should_mult_r[gi-1];
+    end
 
     always @(*) begin
-        x_w[gi+1] = update[gi] ? x_nxt[gi] : x_r[gi+1];
-        y_w[gi+1] = update[gi] ? y_nxt[gi] : y_r[gi+1];
-        z_w[gi+1] = update[gi] ? z_nxt[gi] : z_r[gi+1];
+        y_w[gi+1] = update[gi] ? y_nxt[gi] : y_r[gi];
+        x_w[gi+1] = update[gi] ? x_nxt[gi] : x_r[gi];
+        z_w[gi+1] = update[gi] ? z_nxt[gi] : z_r[gi];
         xy_inv_w[gi+1] = xy_inv_r[gi];
     end
 
@@ -603,6 +625,10 @@ for (gi=0; gi<ITER; gi=gi+1) begin : generate_CORDIC_iter
         z_r[gi+1] <= z_w[gi+1];
         xy_inv_r[gi+1] <= xy_inv_w[gi];
     end
+end
+
+always @(posedge clk) begin
+    should_mult_r <= should_mult_w;
 end
 
 assign dout_x = x_r[ITER+1];
@@ -618,10 +644,12 @@ module PipelinedCORDICNoVec(
     din_z,
     din_dir,
     din_vec,
+    din_update,
     dout_x,
     dout_y,
     dout_z,
-    dout_dir
+    dout_dir,
+    dout_update,
 );
 
 parameter WIDTH = 14;
@@ -635,6 +663,8 @@ output signed [WIDTH-1:0] dout_x, dout_y, dout_z;
 input [ITER-1:0] din_dir;
 output [ITER-1:0] dout_dir; // unused
 input [ITER+1:0] din_vec;
+input [ITER-1:0] din_update;
+output [ITER-1:0] dout_update;
 
 reg signed [WIDTH-1:0] x_r[0:ITER+1], x_w[0:ITER+1];
 reg signed [WIDTH-1:0] y_r[0:ITER+1], y_w[0:ITER+1];
@@ -729,16 +759,18 @@ end
 
 for (gi=0; gi<ITER; gi=gi+1) begin : generate_CORDIC_iter
     assign mode[gi] = (din_vec[gi] && y_r[gi] > 0) || (!din_vec[gi] && din_dir[gi]);
-    assign update[gi] = (din_vec[gi] && y_r[gi] != 0) || (!din_vec[gi]); // TODO z_r in rot
+    assign update[gi] = (din_vec[gi] && y_r[gi] != 0) || (!din_vec[gi] && din_update[gi]);
     assign x_nxt[gi] = mode[gi] ? x_r[gi] + (y_r[gi] >>> gi) : x_r[gi] - (y_r[gi] >>> gi);
     assign y_nxt[gi] = mode[gi] ? y_r[gi] - (x_r[gi] >>> gi) : y_r[gi] + (x_r[gi] >>> gi);
     assign z_nxt[gi] = mode[gi] ? z_r[gi] + dz[gi] : z_r[gi] - dz[gi];
+    // Update angle when in vectoring mode
     assign dout_dir[gi] = din_vec[gi] ? mode[gi] : din_dir[gi];
+    assign dout_update[gi] = din_vec[gi] ? update[gi] : din_update[gi];
 
     always @(*) begin
-        x_w[gi+1] = update[gi] ? (!din_vec[gi] ? x_nxt[gi] : x_r[gi]) : x_r[gi+1];
-        y_w[gi+1] = update[gi] ? (!din_vec[gi] ? y_nxt[gi] : y_r[gi]) : y_r[gi+1];
-        z_w[gi+1] = update[gi] ? z_nxt[gi] : z_r[gi+1];
+        x_w[gi+1] = update[gi] ? (!din_vec[gi] ? x_nxt[gi] : x_r[gi]) : x_r[gi];
+        y_w[gi+1] = update[gi] ? (!din_vec[gi] ? y_nxt[gi] : y_r[gi]) : y_r[gi];
+        z_w[gi+1] = update[gi] ? z_nxt[gi] : z_r[gi];
         xy_inv_w[gi+1] = xy_inv_r[gi];
     end
 

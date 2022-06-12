@@ -201,7 +201,7 @@ initial begin
 		first_output_received = 0;
 		latency = 0;
 		begin : loop
-		for (l=0; l<13; l=l+1) begin
+		for (l=0; l<40; l=l+1) begin
 			@(negedge clk);
 			if (out_valid) begin
 				if (l > 4 && l < 9) begin
@@ -251,8 +251,8 @@ initial begin
 			row_in_2_r = 0 < l && l < 6 ? H_r[1][l-1] : 0;
 			row_in_2_i = 0 < l && l < 6 ? H_i[1][l-1] : 0;
 			row_in_2_f = l == 2;
-			row_in_3_r = 1 < l && l < 7 ? H_r[2][l-2] : 0;
-			row_in_3_i = 1 < l && l < 7 ? H_i[2][l-2] : 0;
+			row_in_3_r = 20 < l && l < 26 ? H_r[2][l-21] : 0;
+			row_in_3_i = 20 < l && l < 26 ? H_i[2][l-21] : 0;
 			row_in_3_f = l == 4;
 			row_in_4_r = 2 < l && l < 8? H_r[3][l-3] : 0;
 			row_in_4_i = 2 < l && l < 8? H_i[3][l-3] : 0;
