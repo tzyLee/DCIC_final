@@ -245,22 +245,17 @@ initial begin
 					disable loop;
 				end
 			end
-			if (in_ready) begin
-				row_in_1_r = l < 5 ? H_r[0][l] : 0;
-				row_in_1_i = l < 5 ? H_i[0][l] : 0;
-				row_in_1_f = l == 0;
-				row_in_2_r = 0 < l && l < 6 ? H_r[1][l-1] : 0;
-				row_in_2_i = 0 < l && l < 6 ? H_i[1][l-1] : 0;
-				row_in_2_f = l == 2;
-				row_in_3_r = 1 < l && l < 7 ? H_r[2][l-2] : 0;
-				row_in_3_i = 1 < l && l < 7 ? H_i[2][l-2] : 0;
-				row_in_3_f = l == 4;
-				row_in_4_r = 2 < l && l < 8? H_r[3][l-3] : 0;
-				row_in_4_i = 2 < l && l < 8? H_i[3][l-3] : 0;
-			end
-			else begin
-				l = l-1; // do not increment
-			end
+			row_in_1_r = l < 5 ? H_r[0][l] : 0;
+			row_in_1_i = l < 5 ? H_i[0][l] : 0;
+			row_in_1_f = l == 0;
+			row_in_2_r = 0 < l && l < 6 ? H_r[1][l-1] : 0;
+			row_in_2_i = 0 < l && l < 6 ? H_i[1][l-1] : 0;
+			row_in_2_f = l == 2;
+			row_in_3_r = 1 < l && l < 7 ? H_r[2][l-2] : 0;
+			row_in_3_i = 1 < l && l < 7 ? H_i[2][l-2] : 0;
+			row_in_3_f = l == 4;
+			row_in_4_r = 2 < l && l < 8? H_r[3][l-3] : 0;
+			row_in_4_i = 2 < l && l < 8? H_i[3][l-3] : 0;
 
 			if (first_output_received == 0) begin
 				latency = latency + 1;
@@ -268,7 +263,7 @@ initial begin
 		end
 		end
 
-		// wait(out_valid);
+		wait(out_valid);
 		// latency = 0;
 		// while(!out_valid) begin
 		// 	@(negedge clk) latency = latency + 1;
