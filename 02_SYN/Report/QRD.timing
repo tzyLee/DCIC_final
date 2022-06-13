@@ -6,7 +6,7 @@ Report : timing
         -max_paths 1
 Design : QRD
 Version: R-2020.09-SP5
-Date   : Mon Jun 13 12:22:00 2022
+Date   : Tue Jun 14 00:04:27 2022
 ****************************************
 
  # A fanout number of 1000 was used for high fanout net computations.
@@ -14,9 +14,9 @@ Date   : Mon Jun 13 12:22:00 2022
 Operating Conditions: slow   Library: slow
 Wire Load Model Mode: top
 
-  Startpoint: pe_row_2_3/cordic_1/y_r_reg[5][5]
+  Startpoint: pe_row_2_2/din_vec_2_r_reg[7]
               (rising edge-triggered flip-flop clocked by clk)
-  Endpoint: pe_row_2_3/cordic_1/y_r_reg[6][13]
+  Endpoint: pe_row_2_2/cordic_4/x_r_reg[8][13]
             (rising edge-triggered flip-flop clocked by clk)
   Path Group: clk
   Path Type: max
@@ -25,42 +25,40 @@ Wire Load Model Mode: top
   --------------------------------------------------------------------------
   clock clk (rise edge)                                   0.00       0.00
   clock network delay (ideal)                             0.00       0.00
-  pe_row_2_3/cordic_1/y_r_reg[5][5]/CK (DFFQX2)           0.00 #     0.00 r
-  pe_row_2_3/cordic_1/y_r_reg[5][5]/Q (DFFQX2)            0.28       0.28 r
-  U10741/Y (NOR2XL)                                       0.07       0.35 f
-  U16266/Y (NAND4X1)                                      0.15       0.50 r
-  U16268/Y (NOR2X2)                                       0.08       0.57 f
-  U7638/Y (AOI2BB2X4)                                     0.21       0.78 f
-  U16269/Y (INVX1)                                        0.31       1.09 r
-  U35395/Y (XOR2X1)                                       0.21       1.30 r
-  U35399/Y (AOI21X1)                                      0.12       1.42 f
-  U35402/Y (OAI21XL)                                      0.24       1.66 r
-  U8643/Y (AOI21XL)                                       0.16       1.81 f
-  U36260/Y (OAI21XL)                                      0.25       2.06 r
-  U14836/Y (AOI21XL)                                      0.14       2.20 f
-  U50788/Y (OAI21XL)                                      0.24       2.45 r
-  U11275/Y (AOI21XL)                                      0.14       2.59 f
-  U50795/Y (OAI21XL)                                      0.24       2.84 r
-  U8642/Y (AOI21XL)                                       0.16       2.99 f
-  U50800/Y (OAI21XL)                                      0.25       3.24 r
-  U14835/Y (AOI21XL)                                      0.14       3.38 f
-  U50805/Y (OAI21XL)                                      0.27       3.65 r
-  U12895/Y (AOI21XL)                                      0.14       3.79 f
-  U50809/Y (XOR2X1)                                       0.15       3.95 f
-  U12894/Y (NAND2XL)                                      0.10       4.05 r
-  U50810/Y (OAI31XL)                                      0.09       4.14 f
-  pe_row_2_3/cordic_1/y_r_reg[6][13]/D (DFFQX1)           0.00       4.14 f
-  data arrival time                                                  4.14
+  pe_row_2_2/din_vec_2_r_reg[7]/CK (DFFQX2)               0.00 #     0.00 r
+  pe_row_2_2/din_vec_2_r_reg[7]/Q (DFFQX2)                0.27       0.27 r
+  U5915/Y (INVXL)                                         0.08       0.36 f
+  U4262/Y (AND2X4)                                        0.20       0.56 f
+  U10080/Y (INVX1)                                        0.21       0.76 r
+  U18301/Y (XNOR2XL)                                      0.24       1.00 f
+  U14078/Y (NOR2XL)                                       0.17       1.18 r
+  U14077/S (ADDHXL)                                       0.24       1.42 r
+  U29637/Y (NOR2X1)                                       0.10       1.51 f
+  U29639/Y (OAI21XL)                                      0.26       1.77 r
+  U5405/Y (AOI21XL)                                       0.18       1.95 f
+  U29646/Y (OAI21X1)                                      0.19       2.14 r
+  U6359/Y (AOI21X1)                                       0.13       2.27 f
+  U15033/Y (OAI21X1)                                      0.16       2.43 r
+  U5404/Y (AOI21XL)                                       0.13       2.57 f
+  U13545/Y (OAI21XL)                                      0.24       2.81 r
+  U15032/Y (AOI21XL)                                      0.14       2.95 f
+  U19695/Y (OAI21XL)                                      0.27       3.22 r
+  U15031/Y (AOI21XL)                                      0.18       3.40 f
+  U13543/Y (OAI21X1)                                      0.19       3.60 r
+  U29678/Y (AOI21X1)                                      0.11       3.70 f
+  U5756/Y (XOR2X1)                                        0.14       3.84 f
+  pe_row_2_2/cordic_4/x_r_reg[8][13]/D (DFFQX1)           0.00       3.84 f
+  data arrival time                                                  3.84
 
-  clock clk (rise edge)                                   4.50       4.50
-  clock network delay (ideal)                             0.00       4.50
-  clock uncertainty                                      -0.10       4.40
-  pe_row_2_3/cordic_1/y_r_reg[6][13]/CK (DFFQX1)          0.00       4.40 r
-  library setup time                                     -0.26       4.14
-  data required time                                                 4.14
+  clock clk (rise edge)                                   4.20       4.20
+  clock network delay (ideal)                             0.00       4.20
+  clock uncertainty                                      -0.10       4.10
+  pe_row_2_2/cordic_4/x_r_reg[8][13]/CK (DFFQX1)          0.00       4.10 r
+  library setup time                                     -0.26       3.84
+  data required time                                                 3.84
   --------------------------------------------------------------------------
-  data required time                                                 4.14
-  data arrival time                                                 -4.14
+  data required time                                                 3.84
+  data arrival time                                                 -3.84
   --------------------------------------------------------------------------
   slack (MET)                                                        0.00
 

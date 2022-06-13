@@ -1,16 +1,49 @@
 N_T = 4; % number of transmit antennas
 N_R = 4; % number of receive antennas
 EbN0 = [0:4:16, 18, 20];
+% decoders = ["K-Best (k=16, sorting)", ...
+%     "K-Best (k=16, sorting, 10 bit)", "K-Best (k=16, sorting, 11 bit)",...
+%     "K-Best (k=16, sorting, 12 bit)", "K-Best (k=16, sorting, 13 bit)",...
+%     "K-Best (k=16, sorting, 14 bit)", "K-Best (k=16, sorting, 15 bit)",...
+%     "K-Best (k=16, sorting, 16 bit)", "K-Best (k=16, sorting, 17 bit)",...
+%     "K-Best (k=16, sorting, 18 bit)"];
+
 decoders = ["K-Best (k=16, sorting)", ...
-    "K-Best (k=16, sorting, 10 bit)", "K-Best (k=16, sorting, 11 bit)",...
-    "K-Best (k=16, sorting, 12 bit)", "K-Best (k=16, sorting, 13 bit)",...
-    "K-Best (k=16, sorting, 14 bit)", "K-Best (k=16, sorting, 15 bit)",...
-    "K-Best (k=16, sorting, 16 bit)", "K-Best (k=16, sorting, 17 bit)",...
-    "K-Best (k=16, sorting, 18 bit)"];
+    "K-Best (k=16, sorting, 5 iter)", "K-Best (k=16, sorting, 6 iter)",...
+    "K-Best (k=16, sorting, 7 iter)", "K-Best (k=16, sorting, 8 iter)",...
+    "K-Best (k=16, sorting, 9 iter)", "K-Best (k=16, sorting, 10 iter)",...
+    "K-Best (k=16, sorting, 11 iter)", "K-Best (k=16, sorting, 12 iter)",...
+    "K-Best (k=16, sorting, 13 iter)"];
+%% Simulation
+% % BER = simulation(N_T, N_R, "16-QAM", 1600, 100000, EbN0, decoders);
+% load('BER-64-QAM.mat')
+
+%% Plot
+% figure;
+% semilogy(EbN0, BER(1, :), '-o', 'LineWidth', 2, 'MarkerSize', 10);
+% hold on;
+% grid on;
+% semilogy(EbN0, BER(2, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+% semilogy(EbN0, BER(3, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+% semilogy(EbN0, BER(4, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+% semilogy(EbN0, BER(5, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+% semilogy(EbN0, BER(6, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+% semilogy(EbN0, BER(7, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+% semilogy(EbN0, BER(8, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+% semilogy(EbN0, BER(9, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+% semilogy(EbN0, BER(10, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+% xlabel("Eb/N0 (dB)");
+% ylabel("BER");
+% title(sprintf("%dx%d 64-QAM Detection under different number of CORIDC iteration", N_T, N_R));
+% legend(decoders, 'Location', 'best');
+% xlim([min(EbN0), max(EbN0)]);
+% ylim([1e-5, 1]);
+% ax = gca;
+% ax.FontSize = 14;
 
 %% Simulation
-% BER = simulation(N_T, N_R, "16-QAM", 1600, 100000, EbN0, decoders);
-load('BER-64-QAM.mat')
+% BER = simulation(N_T, N_R, "64-QAM", 1600, 100000, EbN0, decoders);
+load('BER-64-QAM-iter.mat')
 
 % Plot
 figure;
@@ -18,18 +51,14 @@ semilogy(EbN0, BER(1, :), '-o', 'LineWidth', 2, 'MarkerSize', 10);
 hold on;
 grid on;
 semilogy(EbN0, BER(2, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
-semilogy(EbN0, BER(3, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
-semilogy(EbN0, BER(4, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
-semilogy(EbN0, BER(5, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
-semilogy(EbN0, BER(6, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
-semilogy(EbN0, BER(7, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
-semilogy(EbN0, BER(8, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
-semilogy(EbN0, BER(9, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
-semilogy(EbN0, BER(10, :), '-+', 'LineWidth', 2, 'MarkerSize', 10);
+semilogy(EbN0, BER(3, :), '-*', 'LineWidth', 2, 'MarkerSize', 10);
+semilogy(EbN0, BER(4, :), '-^', 'LineWidth', 2, 'MarkerSize', 10);
+semilogy(EbN0, BER(5, :), '-x', 'LineWidth', 2, 'MarkerSize', 10);
+semilogy(EbN0, BER(6, :), '-|', 'LineWidth', 2, 'MarkerSize', 10);
 xlabel("Eb/N0 (dB)");
 ylabel("BER");
-title(sprintf("%dx%d 16-QAM Detection", N_T, N_R));
-legend(decoders);
+title(sprintf("%dx%d 64-QAM Detection under different number of CORDIC iteration", N_T, N_R));
+legend(decoders, 'Location', 'southwest');
 xlim([min(EbN0), max(EbN0)]);
 ylim([1e-5, 1]);
 ax = gca;
