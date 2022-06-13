@@ -197,15 +197,15 @@ always @(posedge clk) begin
 end
 
 always @(*) begin
-    if (state_r == STATE_IDLE) begin
-        delay_ctrl_w = 0;
-    end
-    else begin
-        delay_ctrl_w = counter_r == ITER_LAST ? delay_ctrl_r+1 : delay_ctrl_r;
-    end
+    delay_ctrl_w = counter_r == ITER_LAST ? delay_ctrl_r+1 : delay_ctrl_r;
 end
 always @(posedge clk) begin
-    delay_ctrl_r <= delay_ctrl_w;
+    if (!rst_n) begin
+        delay_ctrl_r <= 0;
+    end
+    else begin
+        delay_ctrl_r <= delay_ctrl_w;
+    end
 end
 
 always @(*) begin

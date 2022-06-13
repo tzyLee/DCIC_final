@@ -306,23 +306,24 @@ initial begin
 				$finish;
 			end
 			for(k=0; k<H_size; k=k+1) begin
+				if (k >= j) begin
+					diff = R_r[j][k] - R_gold_r[j][k];
+					diff = (diff < 0 ? -diff : diff);
+					R_diff = R_diff + diff;
+					if (diff > ERR_THRESHOLD || ^diff === 1'bx) begin
+						$display("R_r[%2d][%2d] = %d (Expected) != %d (Actual); diff = %d",
+								j, k, R_gold_r[j][k], R_r[j][k], diff);
+						$finish;
+					end
 
-				diff = R_r[j][k] - R_gold_r[j][k];
-				diff = (diff < 0 ? -diff : diff);
-				R_diff = R_diff + diff;
-				if (diff > ERR_THRESHOLD || ^diff === 1'bx) begin
-					$display("R_r[%2d][%2d] = %d (Expected) != %d (Actual); diff = %d",
-							 j, k, R_gold_r[j][k], R_r[j][k], diff);
-					$finish;
-				end
-
-				diff = R_i[j][k] - R_gold_i[j][k];
-				diff = (diff < 0 ? -diff : diff || ^diff === 1'bx);
-				R_diff = R_diff + diff;
-				if (diff > ERR_THRESHOLD) begin
-					$display("R_i[%2d][%2d] = %d (Expected) != %d (Actual); diff = %d",
-							 j, k, R_gold_i[j][k], R_i[j][k], diff);
-					$finish;
+					diff = R_i[j][k] - R_gold_i[j][k];
+					diff = (diff < 0 ? -diff : diff || ^diff === 1'bx);
+					R_diff = R_diff + diff;
+					if (diff > ERR_THRESHOLD) begin
+						$display("R_i[%2d][%2d] = %d (Expected) != %d (Actual); diff = %d",
+								j, k, R_gold_i[j][k], R_i[j][k], diff);
+						$finish;
+					end
 				end
 			end
 		end
