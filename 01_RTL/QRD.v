@@ -568,6 +568,8 @@ wire signed [WIDTH-1:0] x_nxt[0:ITER-1], y_nxt[0:ITER-1], z_nxt[0:ITER-1];
 wire signed update[0:ITER-1];
 wire signed mode[0:ITER-1];
 
+wire signed [WIDTH-1:0] x_shift[0:ITER-1], y_shift[0:ITER-1];
+
 wire din_x_is_neg, din_y_is_neg;
 wire din_z_neg_out, din_z_pos_out;
 wire signed [WIDTH-1:0] din_x_fixed;
@@ -649,12 +651,30 @@ always @(posedge clk) begin
     xy_inv_r[0] <= xy_inv_w[0];
 end
 
+assign x_shift[0] = x_r[0];
+assign x_shift[1] = {x_r[1][WIDTH-1], x_r[1][WIDTH-1:1]};
+assign x_shift[2] = {{2{x_r[2][WIDTH-1]}}, x_r[2][WIDTH-1:2]};
+assign x_shift[3] = {{3{x_r[3][WIDTH-1]}}, x_r[3][WIDTH-1:3]};
+assign x_shift[4] = {{4{x_r[4][WIDTH-1]}}, x_r[4][WIDTH-1:4]};
+assign x_shift[5] = {{5{x_r[5][WIDTH-1]}}, x_r[5][WIDTH-1:5]};
+assign x_shift[6] = {{6{x_r[6][WIDTH-1]}}, x_r[6][WIDTH-1:6]};
+assign x_shift[7] = {{7{x_r[7][WIDTH-1]}}, x_r[7][WIDTH-1:7]};
+
+assign y_shift[0] = y_r[0];
+assign y_shift[1] = {y_r[1][WIDTH-1], y_r[1][WIDTH-1:1]};
+assign y_shift[2] = {{2{y_r[2][WIDTH-1]}}, y_r[2][WIDTH-1:2]};
+assign y_shift[3] = {{3{y_r[3][WIDTH-1]}}, y_r[3][WIDTH-1:3]};
+assign y_shift[4] = {{4{y_r[4][WIDTH-1]}}, y_r[4][WIDTH-1:4]};
+assign y_shift[5] = {{5{y_r[5][WIDTH-1]}}, y_r[5][WIDTH-1:5]};
+assign y_shift[6] = {{6{y_r[6][WIDTH-1]}}, y_r[6][WIDTH-1:6]};
+assign y_shift[7] = {{7{y_r[7][WIDTH-1]}}, y_r[7][WIDTH-1:7]};
+
 for (gi=0; gi<ITER; gi=gi+1) begin : generate_CORDIC_iter
     assign mode[gi] = (din_vec[gi] && y_r[gi] > 0) || (!din_vec[gi] && din_dir[gi]);
     assign update[gi] = (din_vec[gi] && y_r[gi] != 0) || (!din_vec[gi] && din_update[gi]);
-    assign x_nxt[gi] = mode[gi] ? x_r[gi] + (y_r[gi] >>> gi) : x_r[gi] - (y_r[gi] >>> gi);
-    assign y_nxt[gi] = mode[gi] ? y_r[gi] - (x_r[gi] >>> gi) : y_r[gi] + (x_r[gi] >>> gi);
-    assign z_nxt[gi] = mode[gi] ? z_r[gi] + dz[gi] : z_r[gi] - dz[gi];
+    assign x_nxt[gi] = x_r[gi] + (mode[gi] ? y_shift[gi] : -y_shift[gi]);
+    assign y_nxt[gi] = y_r[gi] + (mode[gi] ? -x_shift[gi] : x_shift[gi]);
+    assign z_nxt[gi] = z_r[gi] + (mode[gi] ? dz[gi] : - dz[gi]);
     // Update angle when in vectoring mode
     assign dout_dir[gi] = din_vec[gi] ? mode[gi] : din_dir[gi];
     assign dout_update[gi] = din_vec[gi] ? update[gi] : din_update[gi];
@@ -736,6 +756,8 @@ wire signed [WIDTH-1:0] x_nxt[0:ITER-1], y_nxt[0:ITER-1], z_nxt[0:ITER-1];
 wire signed update[0:ITER-1];
 wire signed mode[0:ITER-1];
 
+wire signed [WIDTH-1:0] x_shift[0:ITER-1], y_shift[0:ITER-1];
+
 wire din_x_is_neg, din_y_is_neg;
 wire din_z_neg_out, din_z_pos_out;
 wire signed [WIDTH-1:0] din_x_fixed;
@@ -811,12 +833,30 @@ always @(posedge clk) begin
     xy_inv_r[0] <= xy_inv_w[0];
 end
 
+assign x_shift[0] = x_r[0];
+assign x_shift[1] = {x_r[1][WIDTH-1], x_r[1][WIDTH-1:1]};
+assign x_shift[2] = {{2{x_r[2][WIDTH-1]}}, x_r[2][WIDTH-1:2]};
+assign x_shift[3] = {{3{x_r[3][WIDTH-1]}}, x_r[3][WIDTH-1:3]};
+assign x_shift[4] = {{4{x_r[4][WIDTH-1]}}, x_r[4][WIDTH-1:4]};
+assign x_shift[5] = {{5{x_r[5][WIDTH-1]}}, x_r[5][WIDTH-1:5]};
+assign x_shift[6] = {{6{x_r[6][WIDTH-1]}}, x_r[6][WIDTH-1:6]};
+assign x_shift[7] = {{7{x_r[7][WIDTH-1]}}, x_r[7][WIDTH-1:7]};
+
+assign y_shift[0] = y_r[0];
+assign y_shift[1] = {y_r[1][WIDTH-1], y_r[1][WIDTH-1:1]};
+assign y_shift[2] = {{2{y_r[2][WIDTH-1]}}, y_r[2][WIDTH-1:2]};
+assign y_shift[3] = {{3{y_r[3][WIDTH-1]}}, y_r[3][WIDTH-1:3]};
+assign y_shift[4] = {{4{y_r[4][WIDTH-1]}}, y_r[4][WIDTH-1:4]};
+assign y_shift[5] = {{5{y_r[5][WIDTH-1]}}, y_r[5][WIDTH-1:5]};
+assign y_shift[6] = {{6{y_r[6][WIDTH-1]}}, y_r[6][WIDTH-1:6]};
+assign y_shift[7] = {{7{y_r[7][WIDTH-1]}}, y_r[7][WIDTH-1:7]};
+
 for (gi=0; gi<ITER; gi=gi+1) begin : generate_CORDIC_iter
     assign mode[gi] = (din_vec[gi] && y_r[gi] > 0) || (!din_vec[gi] && din_dir[gi]);
     assign update[gi] = (din_vec[gi] && y_r[gi] != 0) || (!din_vec[gi] && din_update[gi]);
-    assign x_nxt[gi] = mode[gi] ? x_r[gi] + (y_r[gi] >>> gi) : x_r[gi] - (y_r[gi] >>> gi);
-    assign y_nxt[gi] = mode[gi] ? y_r[gi] - (x_r[gi] >>> gi) : y_r[gi] + (x_r[gi] >>> gi);
-    assign z_nxt[gi] = mode[gi] ? z_r[gi] + dz[gi] : z_r[gi] - dz[gi];
+    assign x_nxt[gi] = x_r[gi] + (mode[gi] ? y_shift[gi] : -y_shift[gi]);
+    assign y_nxt[gi] = y_r[gi] + (mode[gi] ? -x_shift[gi] : x_shift[gi]);
+    assign z_nxt[gi] = z_r[gi] + (mode[gi] ? dz[gi] : - dz[gi]);
     // Update angle when in vectoring mode
     assign dout_dir[gi] = din_vec[gi] ? mode[gi] : din_dir[gi];
     assign dout_update[gi] = din_vec[gi] ? update[gi] : din_update[gi];
