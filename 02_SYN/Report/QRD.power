@@ -7,7 +7,7 @@ Report : power
         -analysis_effort low
 Design : QRD
 Version: R-2020.09-SP5
-Date   : Mon Jun  6 15:46:22 2022
+Date   : Mon Jun 13 12:21:58 2022
 ****************************************
 
 
@@ -29,12 +29,12 @@ Power-specific unit information :
     Leakage Power Units = 1pW
 
 
-  Cell Internal Power  =  16.1147 mW   (67%)
-  Net Switching Power  =   8.1073 mW   (33%)
+  Cell Internal Power  =  53.5013 mW   (85%)
+  Net Switching Power  =   9.2762 mW   (15%)
                          ---------
-Total Dynamic Power    =  24.2220 mW  (100%)
+Total Dynamic Power    =  62.7775 mW  (100%)
 
-Cell Leakage Power     = 281.5399 uW
+Cell Leakage Power     = 502.5643 uW
 
 
                  Internal         Switching           Leakage            Total
@@ -43,10 +43,10 @@ Power Group      Power            Power               Power              Power  
 io_pad             0.0000            0.0000            0.0000            0.0000  (   0.00%)
 memory             0.0000            0.0000            0.0000            0.0000  (   0.00%)
 black_box          0.0000            0.0000            0.0000            0.0000  (   0.00%)
-clock_network  6.0795e-03            0.0000        2.6273e+04        6.1057e-03  (   0.02%)
-register           6.5581            0.1303        3.1097e+07            6.7195  (  27.42%)
+clock_network      0.0000            0.0000            0.0000            0.0000  (   0.00%)
+register          35.6744            1.9002        1.4307e+08           37.7176  (  59.60%)
 sequential         0.0000            0.0000            0.0000            0.0000  (   0.00%)
-combinational      9.5504            7.9769        2.5042e+08           17.7777  (  72.55%)
+combinational     17.8269            7.3759        3.5949e+08           25.5620  (  40.40%)
 --------------------------------------------------------------------------------------------------
-Total             16.1146 mW         8.1073 mW     2.8154e+08 pW        24.5033 mW
+Total             53.5012 mW         9.2761 mW     5.0256e+08 pW        63.2796 mW
 1
