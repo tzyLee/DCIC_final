@@ -15,7 +15,7 @@ module QRD(
 parameter WIDTH = 14;
 parameter ITER = 32;
 parameter HALF_ITER = 16;
-parameter ITER_SWITCH = 4; // 14 -> 16 (13th iteration for CORDIC mult)
+parameter ITER_SWITCH = 3; // 14 -> 16 (13th iteration for CORDIC mult)
 parameter ITER_LAST = HALF_ITER+ITER_SWITCH;
 
 localparam STATE_IDLE = 0;
@@ -76,6 +76,8 @@ wire signed [WIDTH-1:0] col_in_1_r_1, col_out_1_r_1, col_in_1_i_1, col_out_1_i_1
 
 wire col_in_2_f_1, col_out_2_f_1, col_in_2_f_2, col_out_2_f_2;
 wire col_in_1_f_1, col_out_1_f_1;
+
+wire enable2, enable3, enable4;
 // Pipeline control
 wire PE_switch, PE_load, DU_load, CORDIC_load;
 
@@ -86,6 +88,7 @@ wire pipeline_clk, input_clk;
 reg [3:0] state_r, state_w;
 
 reg [4:0] counter_r, counter_w;
+reg [3:0] delay_ctrl_r, delay_ctrl_w;
 
 reg start_output_r, start_output_w;
 
@@ -109,73 +112,62 @@ PE #(.WIDTH(WIDTH)) pe_row_1_2(
     .dout_x_r(row_out_1_r_3), .dout_x_i(row_out_1_i_3), .dout_x_f(row_out_1_f_3),
     .dout_y_r(col_out_2_r_1), .dout_y_i(col_out_2_i_1), .dout_y_f(col_out_2_f_1)
 );
-// PE #(.WIDTH(WIDTH)) pe_row_1_3(
-//     .clk(clk), .rst_n(rst_n), .switch(PE_switch),
-//     .shift1(shift1), .shift2(shift2), .shift3(shift3),
-//     .load(PE_load), .iter(counter_r[3:0]), .subload(CORDIC_load),
-//     .din_a_r(row_in_1_r_3),   .din_a_i(row_in_1_i_3),   .din_a_f(row_in_1_f_3),
-//     .din_b_r(in_row_4_r_r),   .din_b_i(in_row_4_i_r),   .din_b_f(),
-//     .dout_x_r(row_out_1_r_4), .dout_x_i(row_out_1_i_4), .dout_x_f(row_out_1_f_4),
-//     .dout_y_r(col_out_3_r_1), .dout_y_i(col_out_3_i_1), .dout_y_f()
-// );
+PE #(.WIDTH(WIDTH)) pe_row_1_3(
+    .clk(clk), .rst_n(rst_n),
+    .din_a_r(row_in_1_r_3),   .din_a_i(row_in_1_i_3),   .din_a_f(row_in_1_f_3),
+    .din_b_r(in_row_4_r_r),   .din_b_i(in_row_4_i_r),   .din_b_f(),
+    .dout_x_r(row_out_1_r_4), .dout_x_i(row_out_1_i_4), .dout_x_f(row_out_1_f_4),
+    .dout_y_r(col_out_3_r_1), .dout_y_i(col_out_3_i_1), .dout_y_f()
+);
 
-// /* 2nd row */
-// DU #(.WIDTH(WIDTH)) du_row_2(
-//     .clk(clk), .load(DU_load),
-//     .din_r(col_in_1_r_1),  .din_i(col_in_1_i_1),  .din_f(col_in_1_f_1),
-//     .dout_r(row_out_2_r_2), .dout_i(row_out_2_i_2), .dout_f(row_out_2_f_2)
-// );
-// PE #(.WIDTH(WIDTH)) pe_row_2_2(
-//     .clk(clk), .rst_n(rst_n), .switch(PE_switch),
-//     .shift1(shift1), .shift2(shift2), .shift3(shift3),
-//     .load(PE_load), .iter(counter_r[3:0]), .subload(CORDIC_load),
-//     .din_a_r(row_in_2_r_2), .din_a_i(row_in_2_i_2), .din_a_f(row_in_2_f_2),
-//     .din_b_r(col_in_2_r_1), .din_b_i(col_in_2_i_1), .din_b_f(col_in_2_f_1),
-//     .dout_x_r(row_out_2_r_3), .dout_x_i(row_out_2_i_3), .dout_x_f(row_out_2_f_3),
-//     .dout_y_r(col_out_2_r_2), .dout_y_i(col_out_2_i_2), .dout_y_f(col_out_2_f_2)
-// );
-// PE #(.WIDTH(WIDTH)) pe_row_2_3(
-//     .clk(clk), .rst_n(rst_n), .switch(PE_switch),
-//     .shift1(shift1), .shift2(shift2), .shift3(shift3),
-//     .load(PE_load), .iter(counter_r[3:0]), .subload(CORDIC_load),
-//     .din_a_r(row_in_2_r_3),   .din_a_i(row_in_2_i_3),   .din_a_f(row_in_2_f_3),
-//     .din_b_r(col_in_3_r_1),   .din_b_i(col_in_3_i_1),   .din_b_f(),
-//     .dout_x_r(row_out_2_r_4), .dout_x_i(row_out_2_i_4), .dout_x_f(),
-//     .dout_y_r(col_out_3_r_2), .dout_y_i(col_out_3_i_2), .dout_y_f()
-// );
+/* 2nd row */
+assign enable2 = delay_ctrl_r == 2;
+DULong #(.WIDTH(WIDTH)) du_row_2(
+    .clk(clk), .iter(counter_r), .enable(enable2),
+    .din_r(col_in_1_r_1),  .din_i(col_in_1_i_1),  .din_f(col_in_1_f_1),
+    .dout_r(row_out_2_r_2), .dout_i(row_out_2_i_2), .dout_f(row_out_2_f_2)
+);
+PE #(.WIDTH(WIDTH)) pe_row_2_2(
+    .clk(clk), .rst_n(rst_n),
+    .din_a_r(row_in_2_r_2), .din_a_i(row_in_2_i_2), .din_a_f(row_in_2_f_2),
+    .din_b_r(col_in_2_r_1), .din_b_i(col_in_2_i_1), .din_b_f(col_in_2_f_1),
+    .dout_x_r(row_out_2_r_3), .dout_x_i(row_out_2_i_3), .dout_x_f(row_out_2_f_3),
+    .dout_y_r(col_out_2_r_2), .dout_y_i(col_out_2_i_2), .dout_y_f(col_out_2_f_2)
+);
+PE #(.WIDTH(WIDTH)) pe_row_2_3(
+    .clk(clk), .rst_n(rst_n),
+    .din_a_r(row_in_2_r_3),   .din_a_i(row_in_2_i_3),   .din_a_f(row_in_2_f_3),
+    .din_b_r(col_in_3_r_1),   .din_b_i(col_in_3_i_1),   .din_b_f(),
+    .dout_x_r(row_out_2_r_4), .dout_x_i(row_out_2_i_4), .dout_x_f(),
+    .dout_y_r(col_out_3_r_2), .dout_y_i(col_out_3_i_2), .dout_y_f()
+);
 
 // /* 3rd row */
-// DU #(.WIDTH(WIDTH)) du_row_3(
-//     .clk(clk), .load(DU_load),
-//     .din_r(col_in_2_r_2),   .din_i(col_in_2_i_2),   .din_f(col_in_2_f_2),
-//     .dout_r(row_out_3_r_3), .dout_i(row_out_3_i_3), .dout_f(row_out_3_f_3)
-// );
-// PE #(.WIDTH(WIDTH)) pe_row_3_3(
-//     .clk(clk), .rst_n(rst_n), .switch(PE_switch),
-//     .shift1(shift1), .shift2(shift2), .shift3(shift3),
-//     .load(PE_load), .iter(counter_r[3:0]), .subload(CORDIC_load),
-//     .din_a_r(row_in_3_r_3),   .din_a_i(row_in_3_i_3),   .din_a_f(row_in_3_f_3),
-//     .din_b_r(col_in_3_r_2),   .din_b_i(col_in_3_i_2),   .din_b_f(),
-//     .dout_x_r(row_out_3_r_4), .dout_x_i(row_out_3_i_4), .dout_x_f(),
-//     .dout_y_r(col_out_3_r_3), .dout_y_i(col_out_3_i_3), .dout_y_f()
-// );
+assign enable3 = delay_ctrl_r == 4;
+DULong #(.WIDTH(WIDTH)) du_row_3(
+    .clk(clk), .iter(counter_r), .enable(enable3),
+    .din_r(col_in_2_r_2),   .din_i(col_in_2_i_2),   .din_f(col_in_2_f_2),
+    .dout_r(row_out_3_r_3), .dout_i(row_out_3_i_3), .dout_f(row_out_3_f_3)
+);
+PE #(.WIDTH(WIDTH)) pe_row_3_3(
+    .clk(clk), .rst_n(rst_n),
+    .din_a_r(row_in_3_r_3),   .din_a_i(row_in_3_i_3),   .din_a_f(row_in_3_f_3),
+    .din_b_r(col_in_3_r_2),   .din_b_i(col_in_3_i_2),   .din_b_f(),
+    .dout_x_r(row_out_3_r_4), .dout_x_i(row_out_3_i_4), .dout_x_f(),
+    .dout_y_r(col_out_3_r_3), .dout_y_i(col_out_3_i_3), .dout_y_f()
+);
 
-// /* 4th row */
-// DU #(.WIDTH(WIDTH)) du_row_4(
-//     .clk(clk), .load(DU_load),
+/* 4th row */
+// assign enable4 = delay_ctrl_r == 6;
+// DULong #(.WIDTH(WIDTH)) du_row_4(
+//     .clk(clk), .iter(counter_r), .enable(enable4),
 //     .din_r(col_in_3_r_3),   .din_i(col_in_3_i_3),   .din_f(),
 //     .dout_r(row_out_4_r_4), .dout_i(row_out_4_i_4), .dout_f()
 // );
-
-/* Clock gating */
-assign pipeline_clk = clk & ((counter_r == ITER_LAST) || (counter_r == ITER_LAST-1));
-assign input_clk = clk & (state_r == STATE_WAIT || (counter_r == ITER_LAST) || (counter_r == ITER_LAST-1));
+assign {row_out_4_r_4, row_out_4_i_4} = {col_in_3_r_3, col_in_3_i_3};
 
 /* Continuous assignment */
-assign PE_switch = counter_r[4];
-assign PE_load = counter_r == ITER_LAST;
 assign DU_load = state_r == STATE_WAIT || counter_r == ITER_LAST;
-assign CORDIC_load = counter_r == ITER_LAST || counter_r == ITER_SWITCH;
 
 /* Output logic */
 assign {row_out_1_r, row_out_1_i} = {row_out_1_r_4, row_out_1_i_4};
@@ -185,15 +177,13 @@ assign {row_out_4_r, row_out_4_i} = {row_out_4_r_4, row_out_4_i_4};
 
 assign in_ready = (state_r == STATE_WAIT && counter_r != ITER_LAST) ||
                   counter_r == ITER_LAST-1;
-assign out_valid = counter_r == ITER_LAST && start_output_r;
+assign out_valid = delay_ctrl_r >= 4 && counter_r <= 4;
 
 always @(*) begin
     case (state_r)
     STATE_IDLE:  counter_w = counter_r;
     STATE_WAIT:  counter_w = counter_r == ITER_LAST ? 0 : counter_r+1;
-    STATE_CALC:  counter_w = counter_r == ITER_LAST ? 0 :
-                             counter_r == ITER_SWITCH ? 16 :
-                             counter_r+1;
+    STATE_CALC:  counter_w = counter_r == ITER_LAST ? 0 : counter_r+1;
     default:     counter_w = counter_r;
     endcase
 end
@@ -204,6 +194,18 @@ always @(posedge clk) begin
     else begin
         counter_r <= counter_w;
     end
+end
+
+always @(*) begin
+    if (state_r == STATE_IDLE) begin
+        delay_ctrl_w = 0;
+    end
+    else begin
+        delay_ctrl_w = counter_r == ITER_LAST ? delay_ctrl_r+1 : delay_ctrl_r;
+    end
+end
+always @(posedge clk) begin
+    delay_ctrl_r <= delay_ctrl_w;
 end
 
 always @(*) begin
@@ -220,18 +222,6 @@ always @(posedge clk) begin
     end
     else begin
         state_r <= state_w;
-    end
-end
-
-always @(*) begin
-    start_output_w = row_out_1_f_4 || start_output_r;
-end
-always @(posedge clk) begin
-    if (!rst_n) begin
-        start_output_r <= 0;
-    end
-    else begin
-        start_output_r <= start_output_w;
     end
 end
 
@@ -313,6 +303,62 @@ always @(posedge clk) begin
 end
 endmodule
 
+module DULong(
+    clk,
+    iter,
+    enable,
+    din_f,
+    din_r,
+    din_i,
+    dout_f,
+    dout_r,
+    dout_i
+);
+parameter WIDTH = 14;
+
+input clk;
+input enable, din_f;
+input [4:0] iter;
+input signed [WIDTH-1:0] din_r, din_i;
+output reg dout_f;
+output reg signed [WIDTH-1:0] dout_r, dout_i;
+
+reg signed [2*WIDTH:0] reg_r[0:4], reg_w[0:4];
+integer i;
+
+
+always @(*) begin
+    case (iter)
+    0: {dout_f, dout_r, dout_i} = reg_r[0];
+    1: {dout_f, dout_r, dout_i} = reg_r[1];
+    2: {dout_f, dout_r, dout_i} = reg_r[2];
+    3: {dout_f, dout_r, dout_i} = reg_r[3];
+    4: {dout_f, dout_r, dout_i} = reg_r[4];
+    default: {dout_f, dout_r, dout_i} = reg_r[0];
+    endcase
+end
+
+always @(*) begin
+    for (i=0; i<5; i=i+1) begin
+        reg_w[i] = reg_r[i];
+    end
+    if (enable) begin
+        case (iter)
+        0: reg_w[0] = {din_f, din_r, din_i};
+        1: reg_w[1] = {din_f, din_r, din_i};
+        2: reg_w[2] = {din_f, din_r, din_i};
+        3: reg_w[3] = {din_f, din_r, din_i};
+        4: reg_w[4] = {din_f, din_r, din_i};
+        endcase
+    end
+end
+always @(posedge clk) begin
+    for (i=0; i<5; i=i+1) begin
+        reg_r[i] <= reg_w[i];
+    end
+end
+endmodule
+
 module PE(
     clk,
     rst_n,
@@ -360,6 +406,13 @@ reg [ITER+1:0] din_vec_2_r, din_vec_2_w;
 reg [ITER+1:0] din_vec_y_1_r, din_vec_y_1_w;
 reg [ITER+1:0] din_vec_y_2_r, din_vec_y_2_w;
 
+reg ang_a_neg_r;
+wire ang_a_neg_w;
+reg ang_b_neg_r;
+wire ang_b_neg_w;
+reg ang_1_neg_r;
+wire ang_1_neg_w;
+
 /* Wires */
 wire is_vec_mode, is_vec_mode_nxt, is_vec_mode_nxt2;
 wire is_vec_mode2;
@@ -380,28 +433,26 @@ assign cordic_2_z = 0; //is_vec_mode_nxt ? 0 : ang_b_r;
 assign cordic_3_z = 0; //is_vec_mode_nxt2 ? 0 : ang_1_r;
 assign cordic_4_z = 0; //is_vec_mode_nxt2 ? 0 : ang_1_r;
 
-// TODO share is_vec_r between cordic_1 and cordic_2
-// TODO share ang_1 between cordic_3 and cordic_4
 PipelinedCORDIC #(.WIDTH(WIDTH), .ITER(ITER)) cordic_1(
-    .clk(clk), .nxt_mode(is_vec_mode_nxt), .din_update(update_a_r), .dout_update(update_a_w),
+    .clk(clk), .nxt_mode(is_vec_mode_nxt), .din_update(update_a_r), .dout_update(update_a_w), .din_ang_neg(ang_a_neg_r),
     .din_x(din_a_r), .din_y(din_a_i), .din_z(cordic_1_z), .din_dir(dir_a_r), .din_vec(din_vec_1_r),
-    .dout_x(cordic_1_x_out), .dout_y(cordic_1_y_out), .dout_z(cordic_1_z_out), .dout_dir(dir_a_w)
+    .dout_x(cordic_1_x_out), .dout_y(cordic_1_y_out), .dout_z(cordic_1_z_out), .dout_dir(dir_a_w), .dout_ang_neg(ang_a_neg_w)
 );
 PipelinedCORDIC #(.WIDTH(WIDTH), .ITER(ITER)) cordic_2(
-    .clk(clk), .nxt_mode(is_vec_mode_nxt), .din_update(update_b_r), .dout_update(update_b_w),
+    .clk(clk), .nxt_mode(is_vec_mode_nxt), .din_update(update_b_r), .dout_update(update_b_w), .din_ang_neg(ang_b_neg_r),
     .din_x(din_b_r), .din_y(din_b_i), .din_z(cordic_2_z), .din_dir(dir_b_r), .din_vec(din_vec_1_r),
-    .dout_x(cordic_2_x_out), .dout_y(cordic_2_y_out), .dout_z(cordic_2_z_out), .dout_dir(dir_b_w)
+    .dout_x(cordic_2_x_out), .dout_y(cordic_2_y_out), .dout_z(cordic_2_z_out), .dout_dir(dir_b_w), .dout_ang_neg(ang_b_neg_w)
 );
 
 PipelinedCORDIC #(.WIDTH(WIDTH), .ITER(ITER)) cordic_3(
-    .clk(clk), .nxt_mode(din_vec_1_r[ITER+1]), .din_update(update_1_r), .dout_update(update_1_w),
+    .clk(clk), .nxt_mode(din_vec_1_r[ITER+1]), .din_update(update_1_r), .dout_update(update_1_w), .din_ang_neg(ang_1_neg_r),
     .din_x(cordic_1_x_out), .din_y(cordic_2_x_out), .din_z(cordic_3_z), .din_dir(dir_1_r), .din_vec(din_vec_2_r),
-    .dout_x(cordic_3_x_out), .dout_y(cordic_3_y_out), .dout_z(cordic_3_z_out), .dout_dir(dir_1_w)
+    .dout_x(cordic_3_x_out), .dout_y(cordic_3_y_out), .dout_z(cordic_3_z_out), .dout_dir(dir_1_w), .dout_ang_neg(ang_1_neg_w)
 );
 PipelinedCORDICNoVec #(.WIDTH(WIDTH), .ITER(ITER)) cordic_4(
-    .clk(clk), .nxt_mode(din_vec_1_r[ITER+1]), .din_update(update_1_r), .dout_update(),
+    .clk(clk), .nxt_mode(din_vec_1_r[ITER+1]), .din_update(update_1_r), .dout_update(), .din_ang_neg(ang_1_neg_r),
     .din_x(cordic_1_y_out), .din_y(cordic_2_y_out), .din_z(cordic_4_z), .din_dir(dir_1_r), .din_vec(din_vec_2_r),
-    .dout_x(cordic_4_x_out), .dout_y(cordic_4_y_out), .dout_z(cordic_4_z_out), .dout_dir()
+    .dout_x(cordic_4_x_out), .dout_y(cordic_4_y_out), .dout_z(cordic_4_z_out), .dout_dir(), .dout_ang_neg()
 );
 
 always @(posedge clk) begin
@@ -411,6 +462,9 @@ always @(posedge clk) begin
     update_a_r <= update_a_w;
     update_b_r <= update_b_w;
     update_1_r <= update_1_w;
+    ang_a_neg_r <= ang_a_neg_w;
+    ang_b_neg_r <= ang_b_neg_w;
+    ang_1_neg_r <= ang_1_neg_w;
 end
 
 always @(*) begin
@@ -475,11 +529,13 @@ module PipelinedCORDIC(
     din_dir,
     din_vec,
     din_update,
+    din_ang_neg,
     dout_x,
     dout_y,
     dout_z,
     dout_dir,
-    dout_update
+    dout_update,
+    dout_ang_neg
 );
 
 parameter WIDTH = 14;
@@ -487,6 +543,7 @@ parameter GAIN_WIDTH = 10; // 10 fraction bits
 parameter ITER = 8;
 
 input clk, nxt_mode;
+input din_ang_neg;
 // output dout_vec_mode;
 input signed [WIDTH-1:0] din_x, din_y, din_z;
 output signed [WIDTH-1:0] dout_x, dout_y, dout_z;
@@ -495,6 +552,7 @@ output [ITER-1:0] dout_dir;
 input [ITER+1:0] din_vec;
 input [ITER-1:0] din_update;
 output [ITER-1:0] dout_update;
+output dout_ang_neg;
 
 reg signed [WIDTH-1:0] x_r[0:ITER+1], x_w[0:ITER+1];
 reg signed [WIDTH-1:0] y_r[0:ITER+1], y_w[0:ITER+1];
@@ -568,19 +626,15 @@ assign din_y_is_neg = din_y < 0;
 assign din_z_neg_out = din_z < -1786; // -1.7433
 assign din_z_pos_out = din_z > 1785; // 1.7433
 
-assign din_x_fixed = nxt_mode && din_x_is_neg ? -din_x : din_x;
-assign din_y_fixed = nxt_mode && din_x_is_neg ? -din_y : din_y;
+assign din_x_fixed = nxt_mode ? (din_x_is_neg ? -din_x : din_x) : (din_ang_neg ? -din_x : din_x);
+assign din_y_fixed = nxt_mode ? (din_x_is_neg ? -din_y : din_y) : (din_ang_neg ? -din_y : din_y);
 assign din_z_fixed = (
-    nxt_mode ? (
-        din_x_is_neg ? (
-            din_y_is_neg ? $signed('b11001101101111) :
-                           $signed('b00110010010000) // -pi and pi
-        ) : din_z
-    ) : (
-        din_z_neg_out ? (din_z + 3216) : // z + pi
-        din_z_pos_out ? (din_z - 3216) : // z - pi
-                         din_z
-));
+    nxt_mode && din_x_is_neg ? (
+        din_y_is_neg ? $signed('b11001101101111) :
+                        $signed('b00110010010000) // -pi and pi
+    ) : din_z
+);
+assign dout_ang_neg = nxt_mode ? (din_x_is_neg ? 1 : 0) : din_ang_neg;
 
 always @(*) begin
     x_w[0] = din_x_fixed;
@@ -645,11 +699,13 @@ module PipelinedCORDICNoVec(
     din_dir,
     din_vec,
     din_update,
+    din_ang_neg,
     dout_x,
     dout_y,
     dout_z,
     dout_dir,
     dout_update,
+    dout_ang_neg
 );
 
 parameter WIDTH = 14;
@@ -657,6 +713,7 @@ parameter GAIN_WIDTH = 10; // 10 fraction bits
 parameter ITER = 8;
 
 input clk, nxt_mode;
+input din_ang_neg;
 // output dout_vec_mode;
 input signed [WIDTH-1:0] din_x, din_y, din_z;
 output signed [WIDTH-1:0] dout_x, dout_y, dout_z;
@@ -665,6 +722,7 @@ output [ITER-1:0] dout_dir; // unused
 input [ITER+1:0] din_vec;
 input [ITER-1:0] din_update;
 output [ITER-1:0] dout_update;
+output dout_ang_neg;
 
 reg signed [WIDTH-1:0] x_r[0:ITER+1], x_w[0:ITER+1];
 reg signed [WIDTH-1:0] y_r[0:ITER+1], y_w[0:ITER+1];
@@ -730,19 +788,15 @@ assign din_y_is_neg = din_y < 0;
 assign din_z_neg_out = din_z < -1786; // -1.7433
 assign din_z_pos_out = din_z > 1785; // 1.7433
 
-assign din_x_fixed = nxt_mode && din_x_is_neg ? -din_x : din_x;
-assign din_y_fixed = nxt_mode && din_x_is_neg ? -din_y : din_y;
+assign din_x_fixed = nxt_mode ? (din_x_is_neg ? -din_x : din_x) : (din_ang_neg ? -din_x : din_x);
+assign din_y_fixed = nxt_mode ? (din_x_is_neg ? -din_y : din_y) : (din_ang_neg ? -din_y : din_y);
 assign din_z_fixed = (
-    nxt_mode ? (
-        din_x_is_neg ? (
-            din_y_is_neg ? $signed('b11001101101111) :
-                           $signed('b00110010010000) // -pi and pi
-        ) : din_z
-    ) : (
-        din_z_neg_out ? (din_z + 3216) : // z + pi
-        din_z_pos_out ? (din_z - 3216) : // z - pi
-                         din_z
-));
+    nxt_mode && din_x_is_neg ? (
+        din_y_is_neg ? $signed('b11001101101111) :
+                        $signed('b00110010010000) // -pi and pi
+    ) : din_z
+);
+assign dout_ang_neg = nxt_mode ? (din_x_is_neg ? 1 : 0) : din_ang_neg;
 
 always @(*) begin
     x_w[0] = din_x_fixed;
