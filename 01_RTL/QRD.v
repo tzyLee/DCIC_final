@@ -428,31 +428,26 @@ wire signed [WIDTH-1:0] cordic_1_z_out, cordic_2_z_out, cordic_3_z_out, cordic_4
 assign is_vec_mode_nxt = din_a_f;
 assign is_vec_mode2 = din_vec_2_r[ITER+1];
 
-assign cordic_1_z = 0;//is_vec_mode_nxt ? 0 : ang_a_r;
-assign cordic_2_z = 0; //is_vec_mode_nxt ? 0 : ang_b_r;
-assign cordic_3_z = 0; //is_vec_mode_nxt2 ? 0 : ang_1_r;
-assign cordic_4_z = 0; //is_vec_mode_nxt2 ? 0 : ang_1_r;
-
 PipelinedCORDIC #(.WIDTH(WIDTH), .ITER(ITER)) cordic_1(
     .clk(clk), .nxt_mode(is_vec_mode_nxt), .din_update(update_a_r), .dout_update(update_a_w), .din_ang_neg(ang_a_neg_r),
-    .din_x(din_a_r), .din_y(din_a_i), .din_z(cordic_1_z), .din_dir(dir_a_r), .din_vec(din_vec_1_r),
-    .dout_x(cordic_1_x_out), .dout_y(cordic_1_y_out), .dout_z(cordic_1_z_out), .dout_dir(dir_a_w), .dout_ang_neg(ang_a_neg_w)
+    .din_x(din_a_r), .din_y(din_a_i), .din_dir(dir_a_r), .din_vec(din_vec_1_r),
+    .dout_x(cordic_1_x_out), .dout_y(cordic_1_y_out), .dout_dir(dir_a_w), .dout_ang_neg(ang_a_neg_w)
 );
 PipelinedCORDIC #(.WIDTH(WIDTH), .ITER(ITER)) cordic_2(
     .clk(clk), .nxt_mode(is_vec_mode_nxt), .din_update(update_b_r), .dout_update(update_b_w), .din_ang_neg(ang_b_neg_r),
-    .din_x(din_b_r), .din_y(din_b_i), .din_z(cordic_2_z), .din_dir(dir_b_r), .din_vec(din_vec_1_r),
-    .dout_x(cordic_2_x_out), .dout_y(cordic_2_y_out), .dout_z(cordic_2_z_out), .dout_dir(dir_b_w), .dout_ang_neg(ang_b_neg_w)
+    .din_x(din_b_r), .din_y(din_b_i), .din_dir(dir_b_r), .din_vec(din_vec_1_r),
+    .dout_x(cordic_2_x_out), .dout_y(cordic_2_y_out), .dout_dir(dir_b_w), .dout_ang_neg(ang_b_neg_w)
 );
 
 PipelinedCORDIC #(.WIDTH(WIDTH), .ITER(ITER)) cordic_3(
     .clk(clk), .nxt_mode(din_vec_1_r[ITER+1]), .din_update(update_1_r), .dout_update(update_1_w), .din_ang_neg(ang_1_neg_r),
-    .din_x(cordic_1_x_out), .din_y(cordic_2_x_out), .din_z(cordic_3_z), .din_dir(dir_1_r), .din_vec(din_vec_2_r),
-    .dout_x(cordic_3_x_out), .dout_y(cordic_3_y_out), .dout_z(cordic_3_z_out), .dout_dir(dir_1_w), .dout_ang_neg(ang_1_neg_w)
+    .din_x(cordic_1_x_out), .din_y(cordic_2_x_out), .din_dir(dir_1_r), .din_vec(din_vec_2_r),
+    .dout_x(cordic_3_x_out), .dout_y(cordic_3_y_out), .dout_dir(dir_1_w), .dout_ang_neg(ang_1_neg_w)
 );
 PipelinedCORDICNoVec #(.WIDTH(WIDTH), .ITER(ITER)) cordic_4(
     .clk(clk), .nxt_mode(din_vec_1_r[ITER+1]), .din_update(update_1_r), .dout_update(), .din_ang_neg(ang_1_neg_r),
-    .din_x(cordic_1_y_out), .din_y(cordic_2_y_out), .din_z(cordic_4_z), .din_dir(dir_1_r), .din_vec(din_vec_2_r),
-    .dout_x(cordic_4_x_out), .dout_y(cordic_4_y_out), .dout_z(cordic_4_z_out), .dout_dir(), .dout_ang_neg()
+    .din_x(cordic_1_y_out), .din_y(cordic_2_y_out), .din_dir(dir_1_r), .din_vec(din_vec_2_r),
+    .dout_x(cordic_4_x_out), .dout_y(cordic_4_y_out), .dout_dir(), .dout_ang_neg()
 );
 
 always @(posedge clk) begin
@@ -525,14 +520,12 @@ module PipelinedCORDIC(
     nxt_mode,
     din_x,
     din_y,
-    din_z,
     din_dir,
     din_vec,
     din_update,
     din_ang_neg,
     dout_x,
     dout_y,
-    dout_z,
     dout_dir,
     dout_update,
     dout_ang_neg
@@ -545,8 +538,8 @@ parameter ITER = 8;
 input clk, nxt_mode;
 input din_ang_neg;
 // output dout_vec_mode;
-input signed [WIDTH-1:0] din_x, din_y, din_z;
-output signed [WIDTH-1:0] dout_x, dout_y, dout_z;
+input signed [WIDTH-1:0] din_x, din_y;
+output signed [WIDTH-1:0] dout_x, dout_y;
 input [ITER-1:0] din_dir;
 output [ITER-1:0] dout_dir;
 input [ITER+1:0] din_vec;
@@ -558,8 +551,6 @@ reg signed [WIDTH-1:0] x_r[0:ITER+1], x_w[0:ITER+1];
 reg signed [WIDTH-1:0] y_r[0:ITER+1], y_w[0:ITER+1];
 reg signed [WIDTH-1:0] z_r[0:ITER+1], z_w[0:ITER+1];
 
-// reg signed dir_r[0:ITER-1], dir_w[0:ITER-1];
-reg xy_inv_r[0:ITER], xy_inv_w[0:ITER];
 reg [ITER-1:0] should_mult_r;
 wire [ITER-1:0] should_mult_w;
 
@@ -578,7 +569,6 @@ wire signed [WIDTH-1:0] din_z_fixed;
 
 wire signed [WIDTH-1:0] dz[0:ITER-1];
 
-wire signed [WIDTH-1:0] x_mult, y_mult;
 reg signed [WIDTH+GAIN_WIDTH-1:0] x_prod, y_prod;
 
 // Loop vars
@@ -599,22 +589,14 @@ assign dz[7] = 'b00000000001000;
 // assign dz[11] = 'b00000000000000;
 // assign dz[12] = 'b00000000000000;
 
-assign x_mult = (xy_inv_r[ITER] ? -x_r[ITER] : x_r[ITER]);
-assign y_mult = (xy_inv_r[ITER] ? -y_r[ITER] : y_r[ITER]);
 always @(*) begin
-    if (should_mult_r[ITER-1]) begin
-        x_prod = $signed('b1001101110) * x_mult;
-        y_prod = $signed('b1001101110) * y_mult;
-    end
-    else begin
-        x_prod = {x_mult, {GAIN_WIDTH{1'b0}}};
-        y_prod = {y_mult, {GAIN_WIDTH{1'b0}}};
-    end
+    x_prod = $signed('b1001101110) * x_r[ITER];
+    y_prod = $signed('b1001101110) * y_r[ITER];
 end
 
 always @(*) begin
-    x_w[ITER+1] = x_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH];
-    y_w[ITER+1] = y_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH];
+    x_w[ITER+1] = should_mult_r[ITER-1] ? x_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] : x_r[ITER];
+    y_w[ITER+1] = should_mult_r[ITER-1] ? y_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] : y_r[ITER];
     z_w[ITER+1] = z_r[ITER];
 end
 always @(posedge clk) begin
@@ -625,30 +607,21 @@ end
 
 assign din_x_is_neg = din_x < 0;
 assign din_y_is_neg = din_y < 0;
-assign din_z_neg_out = din_z < -1786; // -1.7433
-assign din_z_pos_out = din_z > 1785; // 1.7433
 
 assign din_x_fixed = nxt_mode ? (din_x_is_neg ? -din_x : din_x) : (din_ang_neg ? -din_x : din_x);
 assign din_y_fixed = nxt_mode ? (din_x_is_neg ? -din_y : din_y) : (din_ang_neg ? -din_y : din_y);
-assign din_z_fixed = (
-    nxt_mode && din_x_is_neg ? (
-        din_y_is_neg ? $signed('b11001101101111) :
-                        $signed('b00110010010000) // -pi and pi
-    ) : din_z
-);
+
 assign dout_ang_neg = nxt_mode ? (din_x_is_neg ? 1 : 0) : din_ang_neg;
 
 always @(*) begin
     x_w[0] = din_x_fixed;
     y_w[0] = din_y_fixed;
-    z_w[0] = din_z_fixed;
-    xy_inv_w[0] = (din_z_neg_out || din_z_pos_out); // Reset when the x y is negated
+    z_w[0] = 0;
 end
 always @(posedge clk) begin
     x_r[0] <= x_w[0];
     y_r[0] <= y_w[0];
     z_r[0] <= z_w[0];
-    xy_inv_r[0] <= xy_inv_w[0];
 end
 
 assign x_shift[0] = x_r[0];
@@ -690,14 +663,12 @@ for (gi=0; gi<ITER; gi=gi+1) begin : generate_CORDIC_iter
         y_w[gi+1] = update[gi] ? y_nxt[gi] : y_r[gi];
         x_w[gi+1] = update[gi] ? x_nxt[gi] : x_r[gi];
         z_w[gi+1] = update[gi] ? z_nxt[gi] : z_r[gi];
-        xy_inv_w[gi+1] = xy_inv_r[gi];
     end
 
     always @(posedge clk) begin
         x_r[gi+1] <= x_w[gi+1];
         y_r[gi+1] <= y_w[gi+1];
         z_r[gi+1] <= z_w[gi+1];
-        xy_inv_r[gi+1] <= xy_inv_w[gi];
     end
 end
 
@@ -707,7 +678,6 @@ end
 
 assign dout_x = x_r[ITER+1];
 assign dout_y = y_r[ITER+1];
-assign dout_z = z_r[ITER+1];
 endmodule
 
 module PipelinedCORDICNoVec(
@@ -715,14 +685,12 @@ module PipelinedCORDICNoVec(
     nxt_mode,
     din_x,
     din_y,
-    din_z,
     din_dir,
     din_vec,
     din_update,
     din_ang_neg,
     dout_x,
     dout_y,
-    dout_z,
     dout_dir,
     dout_update,
     dout_ang_neg
@@ -735,8 +703,8 @@ parameter ITER = 8;
 input clk, nxt_mode;
 input din_ang_neg;
 // output dout_vec_mode;
-input signed [WIDTH-1:0] din_x, din_y, din_z;
-output signed [WIDTH-1:0] dout_x, dout_y, dout_z;
+input signed [WIDTH-1:0] din_x, din_y;
+output signed [WIDTH-1:0] dout_x, dout_y;
 input [ITER-1:0] din_dir;
 output [ITER-1:0] dout_dir; // unused
 input [ITER+1:0] din_vec;
@@ -746,25 +714,19 @@ output dout_ang_neg;
 
 reg signed [WIDTH-1:0] x_r[0:ITER+1], x_w[0:ITER+1];
 reg signed [WIDTH-1:0] y_r[0:ITER+1], y_w[0:ITER+1];
-reg signed [WIDTH-1:0] z_r[0:ITER+1], z_w[0:ITER+1];
 // reg signed is_vec_r[0:ITER+1], is_vec_w[0:ITER+1];
 reg signed dir_r[0:ITER-1], dir_w[0:ITER-1];
-reg xy_inv_r[0:ITER], xy_inv_w[0:ITER];
 
 // Wire
-wire signed [WIDTH-1:0] x_nxt[0:ITER-1], y_nxt[0:ITER-1], z_nxt[0:ITER-1];
+wire signed [WIDTH-1:0] x_nxt[0:ITER-1], y_nxt[0:ITER-1];
 wire signed update[0:ITER-1];
 wire signed mode[0:ITER-1];
 
 wire signed [WIDTH-1:0] x_shift[0:ITER-1], y_shift[0:ITER-1];
 
 wire din_x_is_neg, din_y_is_neg;
-wire din_z_neg_out, din_z_pos_out;
 wire signed [WIDTH-1:0] din_x_fixed;
 wire signed [WIDTH-1:0] din_y_fixed;
-wire signed [WIDTH-1:0] din_z_fixed;
-
-wire signed [WIDTH-1:0] dz[0:ITER-1];
 
 wire signed [WIDTH-1:0] x_mult, y_mult;
 reg signed [WIDTH+GAIN_WIDTH-1:0] x_prod, y_prod;
@@ -773,22 +735,8 @@ reg signed [WIDTH+GAIN_WIDTH-1:0] x_prod, y_prod;
 integer i;
 genvar gi;
 
-assign dz[0] = 'b00001100100100;
-assign dz[1] = 'b00000111011011;
-assign dz[2] = 'b00000011111011;
-assign dz[3] = 'b00000001111111;
-assign dz[4] = 'b00000001000000;
-assign dz[5] = 'b00000000100000;
-assign dz[6] = 'b00000000010000;
-assign dz[7] = 'b00000000001000;
-// assign dz[8] = 'b00000000000100;
-// assign dz[9] = 'b00000000000010;
-// assign dz[10] = 'b00000000000001;
-// assign dz[11] = 'b00000000000000;
-// assign dz[12] = 'b00000000000000;
-
-assign x_mult = (xy_inv_r[ITER] ? -x_r[ITER] : x_r[ITER]);
-assign y_mult = (xy_inv_r[ITER] ? -y_r[ITER] : y_r[ITER]);
+assign x_mult = x_r[ITER];
+assign y_mult = y_r[ITER];
 always @(*) begin
     x_prod = $signed('b1001101110) * x_mult;
     y_prod = $signed('b1001101110) * y_mult;
@@ -797,40 +745,27 @@ end
 always @(*) begin
     x_w[ITER+1] = !din_vec[ITER] ? x_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] : x_r[ITER];
     y_w[ITER+1] = !din_vec[ITER] ? y_prod[WIDTH+GAIN_WIDTH-1:GAIN_WIDTH] : y_r[ITER];
-    z_w[ITER+1] = z_r[ITER];
 end
 always @(posedge clk) begin
     x_r[ITER+1] <= x_w[ITER+1];
     y_r[ITER+1] <= y_w[ITER+1];
-    z_r[ITER+1] <= z_w[ITER+1];
 end
 
 assign din_x_is_neg = din_x < 0;
 assign din_y_is_neg = din_y < 0;
-assign din_z_neg_out = din_z < -1786; // -1.7433
-assign din_z_pos_out = din_z > 1785; // 1.7433
 
 assign din_x_fixed = nxt_mode ? (din_x_is_neg ? -din_x : din_x) : (din_ang_neg ? -din_x : din_x);
 assign din_y_fixed = nxt_mode ? (din_x_is_neg ? -din_y : din_y) : (din_ang_neg ? -din_y : din_y);
-assign din_z_fixed = (
-    nxt_mode && din_x_is_neg ? (
-        din_y_is_neg ? $signed('b11001101101111) :
-                        $signed('b00110010010000) // -pi and pi
-    ) : din_z
-);
+
 assign dout_ang_neg = nxt_mode ? (din_x_is_neg ? 1 : 0) : din_ang_neg;
 
 always @(*) begin
     x_w[0] = din_x_fixed;
     y_w[0] = din_y_fixed;
-    z_w[0] = din_z_fixed;
-    xy_inv_w[0] = (din_z_neg_out || din_z_pos_out); // Reset when the x y is negated
 end
 always @(posedge clk) begin
     x_r[0] <= x_w[0];
     y_r[0] <= y_w[0];
-    z_r[0] <= z_w[0];
-    xy_inv_r[0] <= xy_inv_w[0];
 end
 
 assign x_shift[0] = x_r[0];
@@ -856,7 +791,6 @@ for (gi=0; gi<ITER; gi=gi+1) begin : generate_CORDIC_iter
     assign update[gi] = (din_vec[gi] && y_r[gi] != 0) || (!din_vec[gi] && din_update[gi]);
     assign x_nxt[gi] = x_r[gi] + (mode[gi] ? y_shift[gi] : -y_shift[gi]);
     assign y_nxt[gi] = y_r[gi] + (mode[gi] ? -x_shift[gi] : x_shift[gi]);
-    assign z_nxt[gi] = z_r[gi] + (mode[gi] ? dz[gi] : - dz[gi]);
     // Update angle when in vectoring mode
     assign dout_dir[gi] = din_vec[gi] ? mode[gi] : din_dir[gi];
     assign dout_update[gi] = din_vec[gi] ? update[gi] : din_update[gi];
@@ -864,19 +798,14 @@ for (gi=0; gi<ITER; gi=gi+1) begin : generate_CORDIC_iter
     always @(*) begin
         x_w[gi+1] = update[gi] ? (!din_vec[gi] ? x_nxt[gi] : x_r[gi]) : x_r[gi];
         y_w[gi+1] = update[gi] ? (!din_vec[gi] ? y_nxt[gi] : y_r[gi]) : y_r[gi];
-        z_w[gi+1] = update[gi] ? z_nxt[gi] : z_r[gi];
-        xy_inv_w[gi+1] = xy_inv_r[gi];
     end
 
     always @(posedge clk) begin
         x_r[gi+1] <= x_w[gi+1];
         y_r[gi+1] <= y_w[gi+1];
-        z_r[gi+1] <= z_w[gi+1];
-        xy_inv_r[gi+1] <= xy_inv_w[gi];
     end
 end
 
 assign dout_x = x_r[ITER+1];
 assign dout_y = y_r[ITER+1];
-assign dout_z = z_r[ITER+1];
 endmodule
