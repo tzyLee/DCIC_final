@@ -10,14 +10,14 @@ integer SNR_ratio;
 
 
 parameter H_size		= 4; // 4x4 matrix
-parameter dataset		= 1;
+parameter dataset		= 2;
 parameter IN_width		= 14;
 // parameter OUT_width		= 16;
 // parameter latency_limit	= 68;
 parameter TIMEOUT       = 1000;
 
 parameter CYCLE			= 4.5;
-parameter ERR_THRESHOLD = 16;
+parameter ERR_THRESHOLD = 21;
 
 reg signed [IN_width-1:0] din_r, din_i;
 
@@ -88,6 +88,10 @@ initial begin
 
 		case(i)
 		0: begin
+			fp_r = $fopen("../TEST_PATTERN/in_real_pattern01.txt", "r");
+			fp_i = $fopen("../TEST_PATTERN/in_imag_pattern01.txt", "r");
+		end
+		1: begin
 			fp_r = $fopen("../TEST_PATTERN/in_real_pattern02.txt", "r");
 			fp_i = $fopen("../TEST_PATTERN/in_imag_pattern02.txt", "r");
 		end
@@ -102,36 +106,33 @@ initial begin
 		@(negedge clk) rst_n = 0;
 		@(negedge clk) rst_n = 1;
 
-		$display("============= Input Matrix H =============");
+		$display("============= Input Matrix H and y=============");
 		for(j=0; j<H_size; j=j+1) begin
-			for(k=0; k<H_size; k=k+1) begin
+			for(k=0; k<H_size+1; k=k+1) begin
 				count_r = $fscanf(fp_r, "%b", din_r);
 				count_i = $fscanf(fp_i, "%b", din_i);
 				H_r[j][k] = din_r;
 				H_i[j][k] = din_i;
 			end
 			$display(
-				"[%5d+%5dj %5d+%5dj %5d+%5dj %5d+%5dj]",
+				"[%5d+%5dj %5d+%5dj %5d+%5dj %5d+%5dj] [%5d+%5dj]",
 				H_r[j][0], H_i[j][0],
 				H_r[j][1], H_i[j][1],
 				H_r[j][2], H_i[j][2],
-				H_r[j][3], H_i[j][3]
+				H_r[j][3], H_i[j][3],
+				H_r[j][4], H_i[j][4],
 			);
 		end
-		H_r[0][H_size] = 181; // 10 bit fraction
-		H_r[1][H_size] = 362; // 10 bit fraction
-		H_r[2][H_size] = 543; // 10 bit fraction
-		H_r[3][H_size] = 724; // 10 bit fraction
-		H_i[0][H_size] = 724; // 10 bit fraction
-		H_i[1][H_size] = 362; // 10 bit fraction
-		H_i[2][H_size] = 543; // 10 bit fraction
-		H_i[3][H_size] = 181; // 10 bit fraction
 		$fclose(fp_r);
 		$fclose(fp_i);
 
 		// Read golden data
 		case(i)
 		0: begin
+			fp_r = $fopen("../TEST_PATTERN/out_R_real_golden01.txt", "r");
+			fp_i = $fopen("../TEST_PATTERN/out_R_imag_golden01.txt", "r");
+		end
+		1: begin
 			fp_r = $fopen("../TEST_PATTERN/out_R_real_golden02.txt", "r");
 			fp_i = $fopen("../TEST_PATTERN/out_R_imag_golden02.txt", "r");
 		end
@@ -160,43 +161,37 @@ initial begin
 		$fclose(fp_r);
 		$fclose(fp_i);
 
-		// case(i)
-		// 0: begin
-		// 	fp_r = $fopen("../TEST_PATTERN/out_QHy_real_golden02.txt", "r");
-		// 	fp_i = $fopen("../TEST_PATTERN/out_QHy_imag_golden02.txt", "r");
-		// end
-		// default: begin
-		// 	$display("Missing dataset.");
-		// 	$finish;
-		// end
-		// endcase
-		$display("============= Expected QH =============");
-		// for(j=0; j<H_size; j=j+1) begin
-		// 	for(k=0; k<H_size; k=k+1) begin
-		// 		count_r = $fscanf(fp_r, "%b", din_r);
-		// 		count_i = $fscanf(fp_i, "%b", din_i);
+		case(i)
+		0: begin
+			fp_r = $fopen("../TEST_PATTERN/out_QHy_real_golden01.txt", "r");
+			fp_i = $fopen("../TEST_PATTERN/out_QHy_imag_golden01.txt", "r");
+		end
+		1: begin
+			fp_r = $fopen("../TEST_PATTERN/out_QHy_real_golden02.txt", "r");
+			fp_i = $fopen("../TEST_PATTERN/out_QHy_imag_golden02.txt", "r");
+		end
+		default: begin
+			$display("Missing dataset.");
+			$finish;
+		end
+		endcase
+		$display("============= Expected QH*y =============");
+		for(j=0; j<H_size; j=j+1) begin
+			count_r = $fscanf(fp_r, "%b", din_r);
+			count_i = $fscanf(fp_i, "%b", din_i);
 
-		// 		QH_gold_r[j][k] = din_r;
-		// 		QH_gold_i[j][k] = din_i;
-		// 	end
-		QH_gold_r[0] = 1135; // 10 bit fraction
-		QH_gold_r[1] = -28; // 10 bit fraction
-		QH_gold_r[2] = -178; // 10 bit fraction
-		QH_gold_r[3] = -316; // 10 bit fraction
-		QH_gold_i[0] = -197; // 10 bit fraction
-		QH_gold_i[1] = 484; // 10 bit fraction
-		QH_gold_i[2] = -341; // 10 bit fraction
-		QH_gold_i[3] = 381; // 10 bit fraction
-			$display(
-				"[%5d+%5dj %5d+%5dj %5d+%5dj %5d+%5dj]",
-				QH_gold_r[0], QH_gold_i[0],
-				QH_gold_r[1], QH_gold_i[1],
-				QH_gold_r[2], QH_gold_i[2],
-				QH_gold_r[3], QH_gold_i[3]
-			);
-		// end
-		// $fclose(fp_r);
-		// $fclose(fp_i);
+			QH_gold_r[j] = din_r;
+			QH_gold_i[j] = din_i;
+		end
+		$display(
+			"[%5d+%5dj %5d+%5dj %5d+%5dj %5d+%5dj]",
+			QH_gold_r[0], QH_gold_i[0],
+			QH_gold_r[1], QH_gold_i[1],
+			QH_gold_r[2], QH_gold_i[2],
+			QH_gold_r[3], QH_gold_i[3]
+		);
+		$fclose(fp_r);
+		$fclose(fp_i);
 
 		first_output_received = 0;
 		latency = 0;
