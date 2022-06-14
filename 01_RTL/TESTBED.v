@@ -196,47 +196,47 @@ initial begin
 		first_output_received = 0;
 		latency = 0;
 		begin : loop
-		for (l=0; l<110; l=l+1) begin
+		for (l=0; l<180; l=l+1) begin
 			@(negedge clk);
 			if (out_valid) begin
-				if (l > 61 && l < 66) begin
-					R_r[0][l-62] = row_out_1_r;
-					R_i[0][l-62] = row_out_1_i;
+				if (l > 91 && l < 96) begin
+					R_r[0][l-92] = row_out_1_r;
+					R_i[0][l-92] = row_out_1_i;
 					first_output_received = 1;
 				end
-				else if (l == 66) begin
+				else if (l == 96) begin
 					QHy_r[0] = row_out_1_r;
 					QHy_i[0] = row_out_1_i;
 				end
 
-				if (l > 81 && l < 86) begin
-					R_r[1][l-82] = row_out_2_r;
-					R_i[1][l-82] = row_out_2_i;
+				if (l > 121 && l < 126) begin
+					R_r[1][l-122] = row_out_2_r;
+					R_i[1][l-122] = row_out_2_i;
 				end
-				else if (l == 86) begin
+				else if (l == 126) begin
 					QHy_r[1] = row_out_2_r;
 					QHy_i[1] = row_out_2_i;
 				end
 
-				if (l > 101 && l < 106) begin
-					R_r[2][l-102] = row_out_3_r;
-					R_i[2][l-102] = row_out_3_i;
+				if (l > 151 && l < 156) begin
+					R_r[2][l-152] = row_out_3_r;
+					R_i[2][l-152] = row_out_3_i;
 				end
-				else if (l == 106) begin
+				else if (l == 156) begin
 					QHy_r[2] = row_out_3_r;
 					QHy_i[2] = row_out_3_i;
 				end
 
-				if (l > 101 && l < 106) begin
-					R_r[3][l-102] = row_out_4_r;
-					R_i[3][l-102] = row_out_4_i;
+				if (l > 151 && l < 156) begin
+					R_r[3][l-152] = row_out_4_r;
+					R_i[3][l-152] = row_out_4_i;
 				end
-				else if (l == 106) begin
+				else if (l == 156) begin
 					QHy_r[3] = row_out_4_r;
 					QHy_i[3] = row_out_4_i;
 				end
 
-				if (l == 107) begin
+				if (l == 157) begin
 					disable loop;
 				end
 			end
@@ -246,11 +246,11 @@ initial begin
 			row_in_2_r = 0 < l && l < 6 ? H_r[1][l-1] : 0;
 			row_in_2_i = 0 < l && l < 6 ? H_i[1][l-1] : 0;
 			row_in_2_f = l == 2;
-			row_in_3_r = 20 < l && l < 26 ? H_r[2][l-21] : 0;
-			row_in_3_i = 20 < l && l < 26 ? H_i[2][l-21] : 0;
-			row_in_3_f = l == 23;
-			row_in_4_r = 40 < l && l < 46? H_r[3][l-41] : 0;
-			row_in_4_i = 40 < l && l < 46? H_i[3][l-41] : 0;
+			row_in_3_r = 30 < l && l < 36 ? H_r[2][l-31] : 0;
+			row_in_3_i = 30 < l && l < 36 ? H_i[2][l-31] : 0;
+			row_in_3_f = l == 33;
+			row_in_4_r = 60 < l && l < 66? H_r[3][l-61] : 0;
+			row_in_4_i = 60 < l && l < 66? H_i[3][l-61] : 0;
 
 			if (first_output_received == 0) begin
 				latency = latency + 1;
